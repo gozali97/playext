@@ -541,8 +541,13 @@ class AuthenticationHandler {
      * Helper methods
      */
     async findElement(page, selectors) {
+        if (!page || page.isClosed()) {
+            return null;
+        }
+        
         for (const selector of selectors) {
             try {
+                if (page.isClosed()) return null;
                 const element = await page.$(selector);
                 if (element) return element;
             } catch (error) {
@@ -553,12 +558,26 @@ class AuthenticationHandler {
     }
 
     async findAndFillField(page, selectors, value, fieldType) {
+        if (!page || page.isClosed()) {
+            this.logger.warn(`⚠️ Page is closed, cannot fill ${fieldType} field`);
+            return null;
+        }
+
         const element = await this.findElement(page, selectors);
         if (element) {
-            await element.click();
-            await element.fill(value);
-            this.logger.debug(`✅ Filled ${fieldType} field`);
-            return element;
+            try {
+                if (page.isClosed()) {
+                    this.logger.warn(`⚠️ Page closed before filling ${fieldType} field`);
+                    return null;
+                }
+                await element.click();
+                await element.fill(value);
+                this.logger.debug(`✅ Filled ${fieldType} field`);
+                return element;
+            } catch (error) {
+                this.logger.warn(`⚠️ Error filling ${fieldType} field: ${error.message}`);
+                return null;
+            }
         } else {
             this.logger.warn(`⚠️ ${fieldType} field not found`);
             return null;
@@ -566,26 +585,40 @@ class AuthenticationHandler {
     }
 
     async submitLoginForm(page, config) {
+        if (!page || page.isClosed()) {
+            return { method: 'none', success: false, error: 'Page is closed' };
+        }
+
         const submitSelectors = this.getSubmitSelectors(config);
         
         // Try clicking submit button
         const submitButton = await this.findElement(page, submitSelectors);
         if (submitButton) {
-            await Promise.all([
-                page.waitForResponse(response => response.status() !== 304, { timeout: 10000 }).catch(() => null),
-                submitButton.click()
-            ]);
-            return { method: 'button_click', success: true };
+            try {
+                if (page.isClosed()) return { method: 'none', success: false, error: 'Page closed before submit' };
+                await Promise.all([
+                    page.waitForResponse(response => response.status() !== 304, { timeout: 10000 }).catch(() => null),
+                    submitButton.click()
+                ]);
+                return { method: 'button_click', success: true };
+            } catch (error) {
+                return { method: 'button_click', success: false, error: error.message };
+            }
         }
 
         // Try form submission
-        const form = await page.$('form');
-        if (form) {
-            await Promise.all([
-                page.waitForResponse(response => response.status() !== 304, { timeout: 10000 }).catch(() => null),
-                page.keyboard.press('Enter')
-            ]);
-            return { method: 'form_submit', success: true };
+        try {
+            if (page.isClosed()) return { method: 'none', success: false, error: 'Page closed before form submit' };
+            const form = await page.$('form');
+            if (form) {
+                await Promise.all([
+                    page.waitForResponse(response => response.status() !== 304, { timeout: 10000 }).catch(() => null),
+                    page.keyboard.press('Enter')
+                ]);
+                return { method: 'form_submit', success: true };
+            }
+        } catch (error) {
+            return { method: 'form_submit', success: false, error: error.message };
         }
 
         return { method: 'none', success: false };
@@ -593,8 +626,26 @@ class AuthenticationHandler {
 
     async verifyLoginSuccess(page, config) {
         try {
+            // Check if page is still active/accessible
+            if (!page || page.isClosed()) {
+                return {
+                    success: false,
+                    error: 'Page has been closed',
+                    details: null
+                };
+            }
+
             // Wait for potential redirects
             await page.waitForTimeout(2000);
+
+            // Check if page is still active after waiting
+            if (!page || page.isClosed()) {
+                return {
+                    success: false,
+                    error: 'Page was closed during verification wait',
+                    details: null
+                };
+            }
 
             const currentUrl = page.url();
             const title = await page.title();
@@ -609,28 +660,46 @@ class AuthenticationHandler {
             let errorMessages = [];
 
             for (const selector of errorSelectors) {
-                const errorElement = await page.$(selector);
-                if (errorElement) {
-                    hasErrors = true;
-                    const errorText = await errorElement.textContent();
-                    if (errorText) errorMessages.push(errorText.trim());
+                try {
+                    if (page.isClosed()) break;
+                    const errorElement = await page.$(selector);
+                    if (errorElement) {
+                        hasErrors = true;
+                        const errorText = await errorElement.textContent();
+                        if (errorText) errorMessages.push(errorText.trim());
+                    }
+                } catch (e) {
+                    // Continue to next selector if page access fails
                 }
             }
 
-            // Check for success indicators
+            // Check for success indicators with page safety checks
             const successIndicators = [
                 () => currentUrl.includes('dashboard'),
                 () => currentUrl.includes('home'),
                 () => currentUrl.includes('profile'),
                 () => !currentUrl.includes('login'),
-                () => page.$('.user-menu') !== null,
-                () => page.$('[data-testid*="user"]') !== null,
-                () => page.$('.logout') !== null
+                async () => {
+                    if (page.isClosed()) return false;
+                    const element = await page.$('.user-menu');
+                    return element !== null;
+                },
+                async () => {
+                    if (page.isClosed()) return false;
+                    const element = await page.$('[data-testid*="user"]');
+                    return element !== null;
+                },
+                async () => {
+                    if (page.isClosed()) return false;
+                    const element = await page.$('.logout');
+                    return element !== null;
+                }
             ];
 
             let successCount = 0;
             for (const indicator of successIndicators) {
                 try {
+                    if (page.isClosed()) break;
                     if (await indicator()) successCount++;
                 } catch (e) {
                     // Ignore errors in success checks

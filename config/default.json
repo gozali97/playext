@@ -1,13 +1,13 @@
 {
-    "target": {
-        "url": "https://your-website.com",
-        "name": "Your Application",
-        "description": "Configuration for your application testing"
-    },
-    "auth": {
-    "username": "your-username@example.com",
-    "password": "your-password",
-    "loginUrl": "/login",
+  "target": {
+    "url": "https://kpi.k24.co.id",
+    "name": "Your Application",
+    "description": "Configuration for your application testing"
+  },
+  "auth": {
+    "username": "ahmad.gozali@k24.co.id",
+    "password": "multi123T",
+    "loginUrl": "/scp",
     "usernameField": "#username",
     "passwordField": "#password",
     "submitButton": "#login-button",
@@ -52,12 +52,22 @@
     },
     "smoke": {
       "enabled": true,
-      "criticalPaths": ["/login", "/dashboard", "/profile", "/logout"],
+      "criticalPaths": [
+        "/login",
+        "/dashboard",
+        "/profile",
+        "/logout"
+      ],
       "timeout": 30000
     },
     "performance": {
       "enabled": true,
-      "metrics": ["loadTime", "domContentLoaded", "firstPaint", "firstContentfulPaint"],
+      "metrics": [
+        "loadTime",
+        "domContentLoaded",
+        "firstPaint",
+        "firstContentfulPaint"
+      ],
       "thresholds": {
         "loadTime": 3000,
         "domContentLoaded": 2000,
@@ -73,32 +83,49 @@
     },
     "security": {
       "enabled": true,
-      "checks": ["xss", "sqlInjection", "csrf", "headers", "ssl"],
+      "checks": [
+        "xss",
+        "sqlInjection",
+        "csrf",
+        "headers",
+        "ssl"
+      ],
       "timeout": 30000
     }
   },
   "browser": {
     "type": "chromium",
-    "headless": true,
-    "slowMo": 0,
+    "headless": false,
+    "slowMo": 500,
     "timeout": 30000,
     "viewport": {
       "width": 1920,
       "height": 1080
     },
     "options": {
-      "args": ["--no-sandbox", "--disable-setuid-sandbox"]
+      "args": [
+        "--no-sandbox",
+        "--disable-setuid-sandbox"
+      ]
     }
   },
   "reporting": {
     "enabled": true,
-    "formats": ["json", "html"],
+    "formats": [
+      "json",
+      "html"
+    ],
     "outputDir": "reports",
     "includeScreenshots": true,
     "includeVideos": false
   },
   "performance": {
-    "metrics": ["loadTime", "domContentLoaded", "firstPaint", "firstContentfulPaint"],
+    "metrics": [
+      "loadTime",
+      "domContentLoaded",
+      "firstPaint",
+      "firstContentfulPaint"
+    ],
     "thresholds": {
       "loadTime": 3000,
       "domContentLoaded": 2000,
@@ -115,4 +142,4 @@
     "parallel": false,
     "maxConcurrency": 1
   }
-} 
+}

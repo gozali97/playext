@@ -1,0 +1,743 @@
+{
+  "framework": {
+    "name": "Universal Test Automation Framework",
+    "version": "2.0.0",
+    "startTime": "2025-06-14T19:24:39.391Z",
+    "endTime": "2025-06-14T19:25:13.288Z",
+    "duration": 33897,
+    "configuration": {
+      "target": {
+        "url": "https://kpi.k24.co.id",
+        "name": "Your Application",
+        "description": "Configuration for your application testing"
+      },
+      "auth": {
+        "username": "ahmad.gozali@k24.co.id",
+        "password": "multi123T",
+        "loginUrl": "/scp",
+        "usernameField": "#username",
+        "passwordField": "#password",
+        "submitButton": "#login-button",
+        "basicAuth": {
+          "enabled": false,
+          "username": "",
+          "password": ""
+        },
+        "apiKey": "",
+        "bearerToken": "",
+        "loginSelectors": {}
+      },
+      "testTypes": {
+        "unit": {
+          "enabled": true,
+          "testDir": "src/tests/unit",
+          "pattern": "**/*.test.js",
+          "timeout": 5000
+        },
+        "integration": {
+          "enabled": true,
+          "testDir": "src/tests/integration",
+          "pattern": "**/*.test.js",
+          "timeout": 30000
+        },
+        "functional": {
+          "enabled": true,
+          "testDir": "src/tests/functional",
+          "pattern": "**/*.test.js",
+          "timeout": 60000
+        },
+        "e2e": {
+          "enabled": true,
+          "testDir": "src/tests/e2e",
+          "pattern": "**/*.test.js",
+          "timeout": 120000
+        },
+        "regression": {
+          "enabled": true,
+          "baselineDir": "data/baselines",
+          "compareDir": "data/comparisons",
+          "tolerance": 0.1
+        },
+        "smoke": {
+          "enabled": true,
+          "criticalPaths": [
+            "/login",
+            "/dashboard",
+            "/profile",
+            "/logout"
+          ],
+          "timeout": 30000
+        },
+        "performance": {
+          "enabled": true,
+          "metrics": [
+            "loadTime",
+            "domContentLoaded",
+            "firstPaint",
+            "firstContentfulPaint"
+          ],
+          "thresholds": {
+            "loadTime": 3000,
+            "domContentLoaded": 2000,
+            "firstPaint": 1500,
+            "firstContentfulPaint": 2000
+          }
+        },
+        "load": {
+          "enabled": true,
+          "virtualUsers": 10,
+          "duration": 60000,
+          "rampUp": 10000
+        },
+        "security": {
+          "enabled": true,
+          "checks": [
+            "xss",
+            "sqlInjection",
+            "csrf",
+            "headers",
+            "ssl"
+          ],
+          "timeout": 30000
+        }
+      },
+      "browser": {
+        "type": "chromium",
+        "headless": false,
+        "slowMo": 500,
+        "timeout": 30000,
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "options": {
+          "args": [
+            "--no-sandbox",
+            "--disable-setuid-sandbox"
+          ]
+        }
+      },
+      "reporting": {
+        "enabled": true,
+        "formats": [
+          "json",
+          "html"
+        ],
+        "outputDir": "reports",
+        "includeScreenshots": true,
+        "includeVideos": false
+      },
+      "performance": {
+        "metrics": [
+          "loadTime",
+          "domContentLoaded",
+          "firstPaint",
+          "firstContentfulPaint"
+        ],
+        "thresholds": {
+          "loadTime": 3000,
+          "domContentLoaded": 2000,
+          "firstPaint": 1500,
+          "firstContentfulPaint": 2000
+        },
+        "collectNetworkLogs": true,
+        "collectConsoleLogs": true
+      },
+      "security": {
+        "payloads": {
+          "xss": [
+            "<script>alert(\"XSS\")</script>",
+            "\"><script>alert(\"XSS\")</script>",
+            "javascript:alert(\"XSS\")"
+          ],
+          "sqlInjection": [
+            "' OR '1'='1",
+            "'; DROP TABLE users; --",
+            "1' UNION SELECT * FROM users --"
+          ],
+          "csrf": [
+            "../../../etc/passwd",
+            "../../../../windows/system32/drivers/etc/hosts"
+          ]
+        },
+        "headers": [
+          "X-Frame-Options",
+          "X-Content-Type-Options",
+          "X-XSS-Protection",
+          "Strict-Transport-Security",
+          "Content-Security-Policy"
+        ],
+        "ssl": {
+          "checkCertificate": true,
+          "checkProtocols": true
+        }
+      },
+      "global": {
+        "retries": 2,
+        "timeout": 30000,
+        "verbose": true,
+        "parallel": false,
+        "maxConcurrency": 1,
+        "maxWorkers": 4
+      }
+    }
+  },
+  "summary": {
+    "totalTestTypes": 9,
+    "executed": 9,
+    "passed": 8,
+    "failed": 1,
+    "skipped": 0,
+    "totalTests": 19,
+    "errors": [
+      "Critical Path: /login - Critical path failed: 404 ",
+      "Critical Path: /profile - Critical path failed: 404 ",
+      "Critical Path: /logout - Critical path failed: 404 "
+    ]
+  },
+  "testTypes": {
+    "unit": {
+      "type": "unit",
+      "startTime": "2025-06-14T19:24:39.418Z",
+      "endTime": "2025-06-14T19:24:39.422Z",
+      "duration": 4,
+      "status": "PASSED",
+      "summary": {
+        "totalTests": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0
+      },
+      "tests": [],
+      "metrics": {
+        "duration": 3,
+        "testsPerSecond": 0,
+        "averageTestTime": null
+      },
+      "errors": []
+    },
+    "integration": {
+      "type": "integration",
+      "startTime": "2025-06-14T19:24:39.422Z",
+      "endTime": "2025-06-14T19:24:39.423Z",
+      "duration": 1,
+      "status": "PASSED",
+      "summary": {
+        "totalTests": 0,
+        "passed": 0,
+        "failed": 0,
+        "skipped": 0
+      },
+      "tests": [],
+      "metrics": {
+        "duration": 1,
+        "averageTestTime": null,
+        "integrationPoints": 0
+      },
+      "errors": []
+    },
+    "functional": {
+      "type": "functional",
+      "startTime": "2025-06-14T19:24:39.424Z",
+      "endTime": "2025-06-14T19:24:39.424Z",
+      "duration": 0,
+      "status": "PASSED",
+      "summary": {
+        "totalTests": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0
+      },
+      "tests": [
+        {
+          "name": "Basic Functional Test",
+          "status": "PASSED",
+          "duration": 100
+        }
+      ],
+      "metrics": {
+        "duration": 100
+      },
+      "errors": []
+    },
+    "e2e": {
+      "type": "e2e",
+      "startTime": "2025-06-14T19:24:39.424Z",
+      "endTime": "2025-06-14T19:24:39.424Z",
+      "duration": 0,
+      "status": "PASSED",
+      "summary": {
+        "totalTests": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0
+      },
+      "tests": [
+        {
+          "name": "Basic E2E Test",
+          "status": "PASSED",
+          "duration": 200
+        }
+      ],
+      "metrics": {
+        "duration": 200
+      },
+      "errors": []
+    },
+    "regression": {
+      "type": "regression",
+      "startTime": "2025-06-14T19:24:39.425Z",
+      "endTime": "2025-06-14T19:24:39.425Z",
+      "duration": 0,
+      "status": "PASSED",
+      "summary": {
+        "totalTests": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0
+      },
+      "tests": [
+        {
+          "name": "Basic Regression Test",
+          "status": "PASSED",
+          "duration": 300
+        }
+      ],
+      "metrics": {
+        "duration": 300,
+        "tolerance": 0.1
+      },
+      "errors": []
+    },
+    "smoke": {
+      "type": "smoke",
+      "startTime": "2025-06-14T19:24:39.425Z",
+      "endTime": "2025-06-14T19:25:00.863Z",
+      "duration": 21438,
+      "status": "FAILED",
+      "summary": {
+        "totalTests": 6,
+        "passed": 3,
+        "failed": 3,
+        "skipped": 0
+      },
+      "tests": [
+        {
+          "name": "Website Accessibility",
+          "status": "PASSED",
+          "duration": 5002,
+          "result": {
+            "url": "https://kpi.k24.co.id",
+            "title": "Performance Feedback | Dashboard",
+            "status": 200,
+            "hasBasicStructure": true,
+            "jsErrors": 0,
+            "jsErrorDetails": []
+          },
+          "error": null
+        },
+        {
+          "name": "Login Functionality",
+          "status": "PASSED",
+          "duration": 6829,
+          "result": {
+            "loginAttempted": true,
+            "success": true,
+            "strategy": "form",
+            "finalUrl": "https://kpi.k24.co.id/dashboard/admin",
+            "details": {
+              "usernameField": "found",
+              "passwordField": "found",
+              "submitMethod": "button_click",
+              "finalUrl": "https://kpi.k24.co.id/dashboard/admin",
+              "verification": {
+                "success": true,
+                "error": null,
+                "details": {
+                  "currentUrl": "https://kpi.k24.co.id/dashboard/admin",
+                  "title": "Performance Feedback",
+                  "hasErrors": false,
+                  "errorMessages": [],
+                  "successIndicators": 3
+                }
+              }
+            }
+          },
+          "error": null
+        },
+        {
+          "name": "Critical Path: /login",
+          "status": "FAILED",
+          "duration": 2213,
+          "result": null,
+          "error": "Critical path failed: 404 "
+        },
+        {
+          "name": "Critical Path: /dashboard",
+          "status": "PASSED",
+          "duration": 4311,
+          "result": {
+            "url": "https://kpi.k24.co.id/dashboard",
+            "status": 200,
+            "title": "Performance Feedback",
+            "hasContent": true,
+            "loadedSuccessfully": true
+          },
+          "error": null
+        },
+        {
+          "name": "Critical Path: /profile",
+          "status": "FAILED",
+          "duration": 1307,
+          "result": null,
+          "error": "Critical path failed: 404 "
+        },
+        {
+          "name": "Critical Path: /logout",
+          "status": "FAILED",
+          "duration": 1237,
+          "result": null,
+          "error": "Critical path failed: 404 "
+        }
+      ],
+      "metrics": {
+        "duration": 21438,
+        "averageTestTime": 3573,
+        "browserInitTime": 0
+      },
+      "errors": [
+        "Critical Path: /login - Critical path failed: 404 ",
+        "Critical Path: /profile - Critical path failed: 404 ",
+        "Critical Path: /logout - Critical path failed: 404 "
+      ]
+    },
+    "performance": {
+      "type": "performance",
+      "startTime": "2025-06-14T19:25:00.863Z",
+      "endTime": "2025-06-14T19:25:06.356Z",
+      "duration": 5493,
+      "status": "PASSED",
+      "summary": {
+        "totalTests": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0
+      },
+      "tests": [
+        {
+          "name": "Page Load Performance",
+          "status": "PASSED",
+          "duration": 2196,
+          "metrics": {
+            "loadTime": null,
+            "domContentLoaded": null,
+            "firstPaint": 1496,
+            "firstContentfulPaint": 1496,
+            "ttfb": null,
+            "domComplete": null
+          },
+          "error": null
+        },
+        {
+          "name": "Resource Loading Performance",
+          "status": "PASSED",
+          "duration": 891,
+          "metrics": {
+            "totalResources": 12,
+            "totalSize": 396791,
+            "slowResources": [],
+            "failedResources": [],
+            "resourceTypes": {
+              "document": {
+                "count": 2,
+                "totalSize": 0
+              },
+              "stylesheet": {
+                "count": 3,
+                "totalSize": 42594
+              },
+              "image": {
+                "count": 2,
+                "totalSize": 17691
+              },
+              "script": {
+                "count": 3,
+                "totalSize": 282518
+              },
+              "font": {
+                "count": 1,
+                "totalSize": 41752
+              },
+              "other": {
+                "count": 1,
+                "totalSize": 12236
+              }
+            }
+          },
+          "error": null
+        },
+        {
+          "name": "JavaScript Performance",
+          "status": "PASSED",
+          "duration": 1110,
+          "metrics": {
+            "executionTime": 3,
+            "memoryUsage": {
+              "used": 2395372,
+              "total": 5280036,
+              "limit": 4294705152
+            },
+            "result": 50024.46403345574
+          },
+          "error": null
+        },
+        {
+          "name": "Network Performance",
+          "status": "PASSED",
+          "duration": 859,
+          "metrics": {
+            "totalRequests": 13,
+            "totalResponses": 12,
+            "averageResponseTime": 0,
+            "successfulRequests": 12,
+            "failedRequests": 0
+          },
+          "error": null
+        }
+      ],
+      "metrics": {
+        "duration": 5491,
+        "performanceMetrics": {
+          "loadTime": null,
+          "domContentLoaded": null,
+          "firstPaint": 1496,
+          "firstContentfulPaint": 1496,
+          "ttfb": null,
+          "domComplete": null,
+          "totalResources": 12,
+          "totalSize": 396791,
+          "slowResources": [],
+          "failedResources": [],
+          "resourceTypes": {
+            "document": {
+              "count": 2,
+              "totalSize": 0
+            },
+            "stylesheet": {
+              "count": 3,
+              "totalSize": 42594
+            },
+            "image": {
+              "count": 2,
+              "totalSize": 17691
+            },
+            "script": {
+              "count": 3,
+              "totalSize": 282518
+            },
+            "font": {
+              "count": 1,
+              "totalSize": 41752
+            },
+            "other": {
+              "count": 1,
+              "totalSize": 12236
+            }
+          },
+          "executionTime": 3,
+          "memoryUsage": {
+            "used": 2395372,
+            "total": 5280036,
+            "limit": 4294705152
+          },
+          "result": 50024.46403345574,
+          "totalRequests": 13,
+          "totalResponses": 12,
+          "averageResponseTime": 0,
+          "successfulRequests": 12,
+          "failedRequests": 0
+        }
+      },
+      "errors": []
+    },
+    "load": {
+      "type": "load",
+      "startTime": "2025-06-14T19:25:06.356Z",
+      "endTime": "2025-06-14T19:25:06.356Z",
+      "duration": 0,
+      "status": "PASSED",
+      "summary": {
+        "totalTests": 1,
+        "passed": 1,
+        "failed": 0,
+        "skipped": 0
+      },
+      "tests": [
+        {
+          "name": "Basic Load Test",
+          "status": "PASSED",
+          "duration": 5000
+        }
+      ],
+      "metrics": {
+        "duration": 5000,
+        "virtualUsers": 10
+      },
+      "errors": []
+    },
+    "security": {
+      "type": "security",
+      "startTime": "2025-06-14T19:25:06.356Z",
+      "endTime": "2025-06-14T19:25:13.288Z",
+      "duration": 6932,
+      "status": "PASSED",
+      "summary": {
+        "totalTests": 5,
+        "passed": 5,
+        "failed": 0,
+        "skipped": 0
+      },
+      "tests": [
+        {
+          "name": "XSS Vulnerability Test",
+          "status": "PASSED",
+          "duration": 2452,
+          "result": {
+            "tested": true,
+            "vulnerabilities": []
+          },
+          "vulnerabilities": [],
+          "error": null
+        },
+        {
+          "name": "SQL Injection Test",
+          "status": "PASSED",
+          "duration": 2335,
+          "result": {
+            "tested": true,
+            "vulnerabilities": []
+          },
+          "vulnerabilities": [],
+          "error": null
+        },
+        {
+          "name": "CSRF Protection Test",
+          "status": "PASSED",
+          "duration": 932,
+          "result": {
+            "tested": true,
+            "vulnerabilities": [
+              {
+                "type": "CSRF",
+                "severity": "MEDIUM",
+                "description": "Form without CSRF protection",
+                "location": "/scp"
+              }
+            ]
+          },
+          "vulnerabilities": [
+            {
+              "type": "CSRF",
+              "severity": "MEDIUM",
+              "description": "Form without CSRF protection",
+              "location": "/scp"
+            }
+          ],
+          "error": null
+        },
+        {
+          "name": "Security Headers Test",
+          "status": "PASSED",
+          "duration": 303,
+          "result": {
+            "tested": true,
+            "vulnerabilities": [
+              {
+                "type": "MISSING_HEADER",
+                "severity": "MEDIUM",
+                "description": "Missing security header: X-Content-Type-Options",
+                "location": "https://kpi.k24.co.id"
+              },
+              {
+                "type": "MISSING_HEADER",
+                "severity": "MEDIUM",
+                "description": "Missing security header: X-XSS-Protection",
+                "location": "https://kpi.k24.co.id"
+              },
+              {
+                "type": "MISSING_HEADER",
+                "severity": "MEDIUM",
+                "description": "Missing security header: Content-Security-Policy",
+                "location": "https://kpi.k24.co.id"
+              }
+            ],
+            "headers": [
+              "server",
+              "date",
+              "content-type",
+              "transfer-encoding",
+              "connection",
+              "set-cookie",
+              "expires",
+              "cache-control",
+              "pragma",
+              "strict-transport-security",
+              "x-frame-options"
+            ]
+          },
+          "vulnerabilities": [
+            {
+              "type": "MISSING_HEADER",
+              "severity": "MEDIUM",
+              "description": "Missing security header: X-Content-Type-Options",
+              "location": "https://kpi.k24.co.id"
+            },
+            {
+              "type": "MISSING_HEADER",
+              "severity": "MEDIUM",
+              "description": "Missing security header: X-XSS-Protection",
+              "location": "https://kpi.k24.co.id"
+            },
+            {
+              "type": "MISSING_HEADER",
+              "severity": "MEDIUM",
+              "description": "Missing security header: Content-Security-Policy",
+              "location": "https://kpi.k24.co.id"
+            }
+          ],
+          "error": null
+        },
+        {
+          "name": "SSL/TLS Configuration Test",
+          "status": "PASSED",
+          "duration": 473,
+          "result": {
+            "tested": true,
+            "vulnerabilities": [],
+            "sslEnabled": true
+          },
+          "vulnerabilities": [],
+          "error": null
+        }
+      ],
+      "metrics": {
+        "duration": 6932,
+        "vulnerabilities": []
+      },
+      "errors": []
+    }
+  },
+  "environment": {
+    "nodeVersion": "v20.18.1",
+    "platform": "win32",
+    "architecture": "x64",
+    "memory": {
+      "rss": 83009536,
+      "heapTotal": 57593856,
+      "heapUsed": 25427568,
+      "external": 3473841,
+      "arrayBuffers": 69948
+    },
+    "timestamp": "2025-06-14T19:24:39.418Z"
+  }
+}
