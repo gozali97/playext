@@ -20,6 +20,10 @@ const nextConfig = {
         source: '/api/test/:path*',
         destination: '/api/test/:path*',
       },
+      {
+        source: '/reports/:path*',
+        destination: '/api/reports/serve/:path*'
+      }
     ]
   }
 }

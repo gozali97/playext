@@ -1,7 +1,9 @@
 import { useState } from 'react'
 import { ChevronDown, ChevronUp } from 'lucide-react'
+import ArrayInput from './ArrayInput'
+import CriticalPathsInput from './CriticalPathsInput'
 
-export default function ConfigSection({ title, description, config, fields, onUpdate }) {
+export default function ConfigSection({ title, description, config, fields, onUpdate, baseUrl = "" }) {
   const [isExpanded, setIsExpanded] = useState(true)
   const [localConfig, setLocalConfig] = useState(config)
 
@@ -24,7 +26,7 @@ export default function ConfigSection({ title, description, config, fields, onUp
   }
 
   const renderField = (field) => {
-    const value = localConfig?.[field.key] || ''
+    const value = localConfig?.[field.key] || (field.type === 'array' ? [] : '')
 
     switch (field.type) {
       case 'text':
@@ -106,6 +108,27 @@ export default function ConfigSection({ title, description, config, fields, onUp
           />
         )
 
+      case 'array':
+        if (field.key === 'criticalPaths') {
+          return (
+            <CriticalPathsInput
+              value={Array.isArray(value) ? value : []}
+              onChange={(newArray) => handleFieldChange(field.key, newArray)}
+              baseUrl={baseUrl}
+            />
+          )
+        }
+        return (
+          <ArrayInput
+            value={Array.isArray(value) ? value : []}
+            onChange={(newArray) => handleFieldChange(field.key, newArray)}
+            placeholder={field.placeholder || "Add new item"}
+            label=""
+            itemType={field.itemType || "text"}
+            addButtonText={field.addButtonText || "Add Item"}
+          />
+        )
+
       case 'object':
         return (
           <div className="space-y-4 border border-gray-200 rounded-lg p-4">
@@ -134,7 +157,7 @@ export default function ConfigSection({ title, description, config, fields, onUp
   }
 
   const renderSubField = (objectKey, subField) => {
-    const value = localConfig?.[objectKey]?.[subField.key] || ''
+    const value = localConfig?.[objectKey]?.[subField.key] || (subField.type === 'array' ? [] : '')
 
     switch (subField.type) {
       case 'number':
@@ -162,6 +185,27 @@ export default function ConfigSection({ title, description, config, fields, onUp
               {value ? 'Enabled' : 'Disabled'}
             </span>
           </div>
+        )
+
+      case 'array':
+        if (subField.key === 'criticalPaths') {
+          return (
+            <CriticalPathsInput
+              value={Array.isArray(value) ? value : []}
+              onChange={(newArray) => handleObjectFieldChange(objectKey, subField.key, newArray)}
+              baseUrl={baseUrl}
+            />
+          )
+        }
+        return (
+          <ArrayInput
+            value={Array.isArray(value) ? value : []}
+            onChange={(newArray) => handleObjectFieldChange(objectKey, subField.key, newArray)}
+            placeholder={subField.placeholder || "Add new item"}
+            label=""
+            itemType={subField.itemType || "text"}
+            addButtonText={subField.addButtonText || "Add Item"}
+          />
         )
 
       default:

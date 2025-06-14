@@ -22,7 +22,7 @@ export default function Configuration() {
       }
     } catch (error) {
       console.error('Error loading configuration:', error)
-      setMessage({ type: 'error', text: 'Failed to load configuration' })
+      setMessage({ type: 'error', text: 'Gagal memuat konfigurasi' })
     } finally {
       setLoading(false)
     }
@@ -40,30 +40,30 @@ export default function Configuration() {
       })
 
       if (response.ok) {
-        setMessage({ type: 'success', text: 'Configuration saved successfully!' })
+        setMessage({ type: 'success', text: 'Konfigurasi berhasil disimpan!' })
       } else {
         throw new Error('Failed to save configuration')
       }
     } catch (error) {
       console.error('Error saving configuration:', error)
-      setMessage({ type: 'error', text: 'Failed to save configuration' })
+      setMessage({ type: 'error', text: 'Gagal menyimpan konfigurasi' })
     } finally {
       setSaving(false)
     }
   }
 
   const resetConfiguration = async () => {
-    if (confirm('Are you sure you want to reset to default configuration?')) {
+    if (confirm('Apakah Anda yakin ingin reset ke konfigurasi default?')) {
       try {
         const response = await fetch('/api/config/reset', { method: 'POST' })
         if (response.ok) {
           const data = await response.json()
           setConfig(data)
-          setMessage({ type: 'success', text: 'Configuration reset to defaults' })
+          setMessage({ type: 'success', text: 'Konfigurasi berhasil direset ke default' })
         }
       } catch (error) {
         console.error('Error resetting configuration:', error)
-        setMessage({ type: 'error', text: 'Failed to reset configuration' })
+        setMessage({ type: 'error', text: 'Gagal mereset konfigurasi' })
       }
     }
   }
@@ -87,9 +87,9 @@ export default function Configuration() {
         try {
           const imported = JSON.parse(e.target.result)
           setConfig(imported)
-          setMessage({ type: 'success', text: 'Configuration imported successfully!' })
+          setMessage({ type: 'success', text: 'Konfigurasi berhasil diimport!' })
         } catch (error) {
-          setMessage({ type: 'error', text: 'Invalid configuration file' })
+          setMessage({ type: 'error', text: 'File konfigurasi tidak valid' })
         }
       }
       reader.readAsText(file)
@@ -120,8 +120,8 @@ export default function Configuration() {
         <div className="mb-8">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">⚙️ Test Configuration</h1>
-              <p className="text-gray-600 mt-2">Configure your test automation parameters</p>
+              <h1 className="text-3xl font-bold text-gray-900">⚙️ Konfigurasi Test</h1>
+              <p className="text-gray-600 mt-2">Atur parameter automation test framework</p>
             </div>
             
             <div className="flex items-center space-x-3">
@@ -158,7 +158,7 @@ export default function Configuration() {
                 className="btn btn-primary flex items-center space-x-2"
               >
                 <Save className="h-4 w-4" />
-                <span>{saving ? 'Saving...' : 'Save Config'}</span>
+                <span>{saving ? 'Menyimpan...' : 'Simpan Config'}</span>
               </button>
             </div>
           </div>
@@ -181,7 +181,7 @@ export default function Configuration() {
             {/* Target Configuration */}
             <ConfigSection
               title="🎯 Target Application"
-              description="Configure the application under test"
+              description="Konfigurasi aplikasi yang akan ditest"
               config={config.target}
               fields={[
                 { key: 'url', label: 'Application URL', type: 'url', required: true },
@@ -194,7 +194,7 @@ export default function Configuration() {
             {/* Authentication Configuration */}
             <ConfigSection
               title="🔐 Authentication"
-              description="Setup login credentials and methods"
+              description="Setup kredensial login dan metode autentikasi"
               config={config.auth}
               fields={[
                 { key: 'username', label: 'Username/Email', type: 'text', required: true },
@@ -210,7 +210,7 @@ export default function Configuration() {
             {/* Browser Configuration */}
             <ConfigSection
               title="🌐 Browser Settings"
-              description="Configure browser behavior"
+              description="Konfigurasi perilaku browser"
               config={config.browser}
               fields={[
                 { 
@@ -230,28 +230,52 @@ export default function Configuration() {
               onUpdate={(value) => updateConfig('browser', value)}
             />
 
+            {/* Smoke Test Configuration */}
+            <ConfigSection
+              title="💨 Smoke Test Settings"
+              description="Konfigurasi smoke test dan critical paths"
+              config={config.testTypes?.smoke || {}}
+              baseUrl={config.target?.url || ""}
+              fields={[
+                { key: 'enabled', label: 'Enable Smoke Tests', type: 'checkbox' },
+                { key: 'timeout', label: 'Timeout (ms)', type: 'number', min: 5000, max: 120000 },
+                { 
+                  key: 'criticalPaths', 
+                  label: 'Critical Paths', 
+                  type: 'array',
+                  placeholder: 'Masukkan path (contoh: /login, /dashboard)',
+                  itemType: 'text',
+                  addButtonText: 'Tambah Path',
+                  description: 'Daftar path yang critical untuk aplikasi. Contoh: /login, /dashboard, /profile'
+                }
+              ]}
+              onUpdate={(value) => updateConfig('testTypes', { ...config.testTypes, smoke: value })}
+            />
+
             {/* Test Types Configuration */}
             <ConfigSection
               title="🧪 Test Types"
-              description="Enable/disable and configure test types"
+              description="Enable/disable dan konfigurasi jenis test"
               config={config.testTypes}
-              fields={Object.entries(config.testTypes || {}).map(([key, testType]) => ({
-                key,
-                label: key.charAt(0).toUpperCase() + key.slice(1),
-                type: 'object',
-                enabled: testType.enabled,
-                subFields: [
-                  { key: 'enabled', label: 'Enabled', type: 'checkbox' },
-                  { key: 'timeout', label: 'Timeout (ms)', type: 'number', min: 1000 }
-                ]
-              }))}
-              onUpdate={(value) => updateConfig('testTypes', value)}
+              fields={Object.entries(config.testTypes || {})
+                .filter(([key]) => key !== 'smoke') // Exclude smoke since it has its own section
+                .map(([key, testType]) => ({
+                  key,
+                  label: key.charAt(0).toUpperCase() + key.slice(1),
+                  type: 'object',
+                  enabled: testType.enabled,
+                  subFields: [
+                    { key: 'enabled', label: 'Enabled', type: 'checkbox' },
+                    { key: 'timeout', label: 'Timeout (ms)', type: 'number', min: 1000 }
+                  ]
+                }))}
+              onUpdate={(value) => updateConfig('testTypes', { ...value, smoke: config.testTypes.smoke })}
             />
 
             {/* Performance Configuration */}
             <ConfigSection
               title="⚡ Performance Settings"
-              description="Configure performance test thresholds"
+              description="Konfigurasi threshold performance test"
               config={config.performance}
               fields={[
                 { key: 'collectNetworkLogs', label: 'Collect Network Logs', type: 'checkbox' },
@@ -271,10 +295,38 @@ export default function Configuration() {
               onUpdate={(value) => updateConfig('performance', value)}
             />
 
+            {/* Security Configuration */}
+            <ConfigSection
+              title="🔒 Security Settings"
+              description="Konfigurasi security test checks"
+              config={config.security}
+              fields={[
+                { 
+                  key: 'checks', 
+                  label: 'Security Checks', 
+                  type: 'array',
+                  placeholder: 'Masukkan jenis security check',
+                  itemType: 'text',
+                  addButtonText: 'Tambah Check',
+                  description: 'Jenis security test yang akan dijalankan'
+                },
+                { 
+                  key: 'headers', 
+                  label: 'Security Headers', 
+                  type: 'array',
+                  placeholder: 'Masukkan nama header',
+                  itemType: 'text',
+                  addButtonText: 'Tambah Header',
+                  description: 'Security headers yang akan dicek'
+                }
+              ]}
+              onUpdate={(value) => updateConfig('security', value)}
+            />
+
             {/* Global Configuration */}
             <ConfigSection
               title="🌍 Global Settings"
-              description="General test execution settings"
+              description="Pengaturan umum eksekusi test"
               config={config.global}
               fields={[
                 { key: 'retries', label: 'Test Retries', type: 'number', min: 0, max: 5 },
