@@ -1,0 +1,61 @@
+{
+  "target": {
+    "url": "https://kpi.k24.co.id",
+    "name": "Basic Auth Protected Site",
+    "description": "Configuration for websites using HTTP Basic Authentication"
+  },
+  "auth": {
+    "strategy": "basic",
+    "username": "ahmad.gozali@k24.co.id",
+    "password": "multi123T",
+    "loginUrl": "/scp",
+    "basicAuth": {
+      "enabled": true,
+      "username": "c",
+      "password": "c"
+    }
+  },
+  "testTypes": {
+    "unit": { "enabled": false },
+    "integration": { "enabled": true, "timeout": 15000 },
+    "functional": { "enabled": true, "timeout": 30000 },
+    "e2e": { "enabled": true, "timeout": 60000 },
+    "regression": { "enabled": false },
+    "smoke": { 
+      "enabled": true, 
+      "criticalPaths": ["/", "/scp", "/board/admin", "/module/admin"],
+      "timeout": 60000 
+    },
+    "performance": { 
+      "enabled": true,
+      "thresholds": {
+        "loadTime": 10000,
+        "domContentLoaded": 8000,
+        "firstPaint": 5000
+      }
+    },
+    "load": { "enabled": false },
+    "security": { 
+      "enabled": true,
+      "checks": ["headers", "ssl"]
+    }
+  },
+  "browser": {
+    "type": "chromium",
+    "headless": false,
+    "slowMo": 100,
+    "timeout": 30000,
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "options": {
+      "args": ["--no-sandbox", "--disable-setuid-sandbox"]
+    }
+  },
+  "global": {
+    "retries": 1,
+    "timeout": 30000,
+    "verbose": true
+  }
+} 

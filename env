@@ -1,0 +1,23 @@
+# Contoh file environment variables
+# Salin file ini ke .env dan sesuaikan dengan konfigurasi Anda
+
+# URL website target untuk testing
+TEST_URL=https://klc.k24.co.id/login
+
+# Kredensial login
+TEST_USERNAME=ahmad.gozali@k24.co.id
+TEST_PASSWORD=multi123T
+
+# Session/Cookie options
+USE_COOKIE=false
+COOKIE_FILE=auth.json
+
+# Browser options
+HEADLESS=false
+TIMEOUT=30000
+
+# Logging level (error, warn, info, debug)
+LOG_LEVEL=info
+
+# Output file untuk hasil testing
+OUTPUT_FILE=test-results.json 

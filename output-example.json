@@ -1,0 +1,190 @@
+{
+  "timestamp": "2024-01-15T10:30:00.000Z",
+  "config": {
+    "url": "https://example.com/login",
+    "loginMethod": "credentials"
+  },
+  "loginResult": {
+    "method": "credentials",
+    "success": true,
+    "message": "Login berhasil"
+  },
+  "testResults": [
+    {
+      "formIndex": 0,
+      "formId": "contact-form",
+      "formAction": "/contact/submit",
+      "formMethod": "POST",
+      "fieldsCount": 4,
+      "tests": [
+        {
+          "testName": "Valid Data Filling",
+          "success": true,
+          "message": "Form berhasil disubmit",
+          "fieldsFilledCount": 4,
+          "totalFields": 4,
+          "submitResult": {
+            "success": true,
+            "message": "Form berhasil disubmit"
+          }
+        },
+        {
+          "testName": "Empty Form Submission (Validation Test)",
+          "success": true,
+          "message": "Form ditolak dengan benar untuk data kosong",
+          "validationMessages": [
+            "Name is required",
+            "Email is required",
+            "Message is required"
+          ],
+          "submitResult": {
+            "success": false,
+            "message": "Validation errors found"
+          }
+        },
+        {
+          "testName": "Invalid Data Test",
+          "success": true,
+          "message": "Form menolak data tidak valid dengan benar",
+          "validationMessages": [
+            "Please enter a valid email address"
+          ],
+          "submitResult": {
+            "success": false,
+            "message": "Invalid data rejected"
+          }
+        },
+        {
+          "testName": "XSS Security Test",
+          "success": true,
+          "message": "XSS payload tidak terlihat di response (Good)",
+          "payload": "<script>alert(\"XSS\")</script>",
+          "isReflected": false
+        },
+        {
+          "testName": "SQL Injection Security Test",
+          "success": true,
+          "message": "Tidak ada SQL error messages (Good)",
+          "payload": "' OR '1'='1",
+          "hasSQLErrors": false
+        },
+        {
+          "testName": "Path Traversal Security Test",
+          "success": true,
+          "message": "Tidak ada system file contents (Good)",
+          "payload": "../../../etc/passwd",
+          "hasSystemFiles": false
+        },
+        {
+          "testName": "Boundary Values Test",
+          "success": true,
+          "message": "Semua boundary values ditangani dengan benar",
+          "boundaryResults": [
+            {
+              "fieldName": "name",
+              "maxLength": 50,
+              "inputLength": 60,
+              "actualLength": 50,
+              "properlyTruncated": true
+            }
+          ]
+        }
+      ],
+      "summary": {
+        "totalTests": 7,
+        "passed": 7,
+        "failed": 0,
+        "errors": []
+      },
+      "timestamp": "2024-01-15T10:30:15.000Z"
+    },
+    {
+      "formIndex": 1,
+      "formId": "newsletter-form",
+      "formAction": "/newsletter/subscribe",
+      "formMethod": "POST",
+      "fieldsCount": 1,
+      "tests": [
+        {
+          "testName": "Valid Data Filling",
+          "success": true,
+          "message": "Form berhasil disubmit",
+          "fieldsFilledCount": 1,
+          "totalFields": 1,
+          "submitResult": {
+            "success": true,
+            "message": "Form berhasil disubmit"
+          }
+        },
+        {
+          "testName": "Empty Form Submission (Validation Test)",
+          "success": true,
+          "message": "Form ditolak dengan benar untuk data kosong",
+          "validationMessages": [
+            "Email is required"
+          ],
+          "submitResult": {
+            "success": false,
+            "message": "Validation errors found"
+          }
+        },
+        {
+          "testName": "Invalid Data Test",
+          "success": true,
+          "message": "Form menolak data tidak valid dengan benar",
+          "validationMessages": [
+            "Please enter a valid email address"
+          ],
+          "submitResult": {
+            "success": false,
+            "message": "Invalid data rejected"
+          }
+        },
+        {
+          "testName": "XSS Security Test",
+          "success": false,
+          "message": "XSS payload terdeteksi di response (VULNERABILITY FOUND!)",
+          "payload": "<script>alert(\"XSS\")</script>",
+          "isReflected": true
+        },
+        {
+          "testName": "SQL Injection Security Test",
+          "success": true,
+          "message": "Tidak ada SQL error messages (Good)",
+          "payload": "' OR '1'='1",
+          "hasSQLErrors": false
+        },
+        {
+          "testName": "Path Traversal Security Test",
+          "success": true,
+          "message": "Tidak ada system file contents (Good)",
+          "payload": "../../../etc/passwd",
+          "hasSystemFiles": false
+        },
+        {
+          "testName": "Boundary Values Test",
+          "success": true,
+          "message": "Semua boundary values ditangani dengan benar",
+          "boundaryResults": []
+        }
+      ],
+      "summary": {
+        "totalTests": 7,
+        "passed": 6,
+        "failed": 1,
+        "errors": [
+          "XSS payload terdeteksi di response (VULNERABILITY FOUND!)"
+        ]
+      },
+      "timestamp": "2024-01-15T10:30:45.000Z"
+    }
+  ],
+  "summary": {
+    "totalTests": 2,
+    "passed": 1,
+    "failed": 1,
+    "errors": [
+      "XSS payload terdeteksi di response (VULNERABILITY FOUND!)"
+    ]
+  }
+} 

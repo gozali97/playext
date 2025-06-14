@@ -1,0 +1,51 @@
+{
+  "cookies": [
+    {
+      "name": "session_id",
+      "value": "abc123def456ghi789jkl012mno345pqr678stu901vwx234yz567890",
+      "domain": "example.com",
+      "path": "/",
+      "expires": 1735689600,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "csrf_token",
+      "value": "xyz987uvw654rst321opq098nml765kji432hgf109edc876ba543z210",
+      "domain": "example.com",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Strict"
+    },
+    {
+      "name": "remember_token",
+      "value": "user123_remember_token_abcdef",
+      "domain": "example.com",
+      "path": "/",
+      "expires": 1767225600,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "https://example.com",
+      "localStorage": [
+        {
+          "name": "user_preferences",
+          "value": "{\"theme\":\"dark\",\"language\":\"id\"}"
+        }
+      ],
+      "sessionStorage": [
+        {
+          "name": "temp_data",
+          "value": "temporary_session_data"
+        }
+      ]
+    }
+  ]
+} 

@@ -1,0 +1,98 @@
+{
+  "url": "https://example.com/login",
+  "username": "your-username",
+  "password": "your-password",
+  "saveSession": true,
+  "sessionFile": "standard-auth.json",
+  
+  "browser": {
+    "headless": false,
+    "timeout": 30000,
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    }
+  },
+  
+  "reactMode": {
+    "enabled": false,
+    "comment": "Disabled for standard websites"
+  },
+  
+  "basicAuth": {
+    "enabled": false,
+    "username": "",
+    "password": ""
+  },
+  
+  "delays": {
+    "min": 500,
+    "max": 1500,
+    "beforeSubmit": 1000,
+    "afterSubmit": 2000
+  },
+  
+  "selectors": {
+    "login": {
+      "usernameFields": [
+        "input[name='username']",
+        "input[name='email']",
+        "input[type='email']",
+        "input[name='login']",
+        "#username",
+        "#email",
+        ".username",
+        ".email"
+      ],
+      "passwordFields": [
+        "input[name='password']",
+        "input[type='password']",
+        "#password",
+        ".password"
+      ],
+      "submitButtons": [
+        "button[type='submit']",
+        "input[type='submit']",
+        ".login-button",
+        ".submit-button",
+        ".btn-submit",
+        ".btn-login"
+      ]
+    },
+    "dashboard": [
+      ".dashboard",
+      "#dashboard",
+      ".main-content",
+      ".user-menu",
+      ".logout",
+      "a[href*='logout']"
+    ]
+  },
+  
+  "security": {
+    "handleCSRF": true,
+    "detectAntiBot": true,
+    "randomDelay": true
+  },
+  
+  "output": {
+    "saveResults": true,
+    "outputDir": "./output",
+    "screenshotOnError": true
+  },
+  
+  "debug": false,
+  
+  "retry": {
+    "maxAttempts": 3,
+    "delay": 1000
+  },
+  
+  "testingOptions": {
+    "testValidData": true,
+    "testInvalidData": true,
+    "testSecurity": true,
+    "testBoundary": true,
+    "maxFormsToTest": 5
+  }
+} 

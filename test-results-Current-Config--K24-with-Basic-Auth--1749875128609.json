@@ -1,0 +1,22 @@
+{
+  "timestamp": "2025-06-14T04:25:18.701Z",
+  "config": {
+    "url": "https://project.k24.co.id/scp",
+    "loginMethod": "credentials",
+    "basicAuth": "enabled"
+  },
+  "loginResult": {
+    "method": "credentials",
+    "success": false,
+    "message": "Form login tidak ditemukan atau tidak lengkap"
+  },
+  "testResults": [],
+  "summary": {
+    "totalTests": 0,
+    "passed": 0,
+    "failed": 0,
+    "errors": [
+      "Login gagal"
+    ]
+  }
+}

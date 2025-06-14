@@ -1,0 +1,118 @@
+{
+    "target": {
+        "url": "https://your-website.com",
+        "name": "Your Application",
+        "description": "Configuration for your application testing"
+    },
+    "auth": {
+    "username": "your-username@example.com",
+    "password": "your-password",
+    "loginUrl": "/login",
+    "usernameField": "#username",
+    "passwordField": "#password",
+    "submitButton": "#login-button",
+    "basicAuth": {
+      "enabled": false,
+      "username": "",
+      "password": ""
+    },
+    "apiKey": "",
+    "bearerToken": ""
+  },
+  "testTypes": {
+    "unit": {
+      "enabled": true,
+      "testDir": "src/tests/unit",
+      "pattern": "**/*.test.js",
+      "timeout": 5000
+    },
+    "integration": {
+      "enabled": true,
+      "testDir": "src/tests/integration",
+      "pattern": "**/*.test.js",
+      "timeout": 30000
+    },
+    "functional": {
+      "enabled": true,
+      "testDir": "src/tests/functional",
+      "pattern": "**/*.test.js",
+      "timeout": 60000
+    },
+    "e2e": {
+      "enabled": true,
+      "testDir": "src/tests/e2e",
+      "pattern": "**/*.test.js",
+      "timeout": 120000
+    },
+    "regression": {
+      "enabled": true,
+      "baselineDir": "data/baselines",
+      "compareDir": "data/comparisons",
+      "tolerance": 0.1
+    },
+    "smoke": {
+      "enabled": true,
+      "criticalPaths": ["/login", "/dashboard", "/profile", "/logout"],
+      "timeout": 30000
+    },
+    "performance": {
+      "enabled": true,
+      "metrics": ["loadTime", "domContentLoaded", "firstPaint", "firstContentfulPaint"],
+      "thresholds": {
+        "loadTime": 3000,
+        "domContentLoaded": 2000,
+        "firstPaint": 1500,
+        "firstContentfulPaint": 2000
+      }
+    },
+    "load": {
+      "enabled": true,
+      "virtualUsers": 10,
+      "duration": 60000,
+      "rampUp": 10000
+    },
+    "security": {
+      "enabled": true,
+      "checks": ["xss", "sqlInjection", "csrf", "headers", "ssl"],
+      "timeout": 30000
+    }
+  },
+  "browser": {
+    "type": "chromium",
+    "headless": true,
+    "slowMo": 0,
+    "timeout": 30000,
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "options": {
+      "args": ["--no-sandbox", "--disable-setuid-sandbox"]
+    }
+  },
+  "reporting": {
+    "enabled": true,
+    "formats": ["json", "html"],
+    "outputDir": "reports",
+    "includeScreenshots": true,
+    "includeVideos": false
+  },
+  "performance": {
+    "metrics": ["loadTime", "domContentLoaded", "firstPaint", "firstContentfulPaint"],
+    "thresholds": {
+      "loadTime": 3000,
+      "domContentLoaded": 2000,
+      "firstPaint": 1500,
+      "firstContentfulPaint": 2000
+    },
+    "collectNetworkLogs": true,
+    "collectConsoleLogs": true
+  },
+  "global": {
+    "retries": 2,
+    "timeout": 30000,
+    "verbose": true,
+    "parallel": false,
+    "maxConcurrency": 1
+  }
+} 

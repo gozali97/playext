@@ -1,0 +1,120 @@
+{
+  "url": "https://react-app.com/login",
+  "username": "your-username",
+  "password": "your-password",
+  "saveSession": true,
+  "sessionFile": "react-auth.json",
+  
+  "browser": {
+    "headless": false,
+    "timeout": 60000,
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    }
+  },
+  
+  "reactMode": {
+    "enabled": true,
+    "comment": "Enabled for React/SPA websites"
+  },
+  
+  "basicAuth": {
+    "enabled": false,
+    "username": "",
+    "password": ""
+  },
+  
+  "delays": {
+    "min": 1000,
+    "max": 3000,
+    "beforeSubmit": 3000,
+    "afterSubmit": 5000
+  },
+  
+  "selectors": {
+    "login": {
+      "usernameFields": [
+        "input[name='username']",
+        "input[name='email']",
+        "input[type='email']",
+        "[data-testid*='username']",
+        "[data-testid*='email']",
+        "[data-cy*='username']",
+        "[data-cy*='email']",
+        ".username-input",
+        ".email-input",
+        ".login-input",
+        "#username",
+        "#email",
+        "#user",
+        "input[placeholder*='email']",
+        "input[placeholder*='Email']",
+        "input[placeholder*='username']",
+        "input[placeholder*='Username']"
+      ],
+      "passwordFields": [
+        "input[name='password']",
+        "input[type='password']",
+        "[data-testid*='password']",
+        "[data-cy*='password']",
+        ".password-input",
+        "#password",
+        "#pass",
+        "input[placeholder*='password']",
+        "input[placeholder*='Password']"
+      ],
+      "submitButtons": [
+        "button[type='submit']",
+        "input[type='submit']",
+        "[data-testid*='submit']",
+        "[data-testid*='login']",
+        "[data-cy*='submit']",
+        "[data-cy*='login']",
+        ".login-btn",
+        ".submit-btn",
+        ".btn-login",
+        ".btn-submit",
+        ".btn-primary",
+        "button"
+      ]
+    },
+    "dashboard": [
+      ".dashboard",
+      "#dashboard",
+      ".main-content",
+      ".user-menu",
+      ".logout",
+      "a[href*='logout']",
+      "[data-testid*='dashboard']",
+      "[data-testid*='user-menu']"
+    ]
+  },
+  
+  "security": {
+    "handleCSRF": true,
+    "detectAntiBot": true,
+    "randomDelay": true
+  },
+  
+  "output": {
+    "saveResults": true,
+    "outputDir": "./output",
+    "screenshotOnError": true
+  },
+  
+  "debug": true,
+  
+  "retry": {
+    "maxAttempts": 5,
+    "delay": 3000
+  },
+  
+  "testingOptions": {
+    "testValidData": false,
+    "testInvalidData": false,
+    "testSecurity": false,
+    "testBoundary": false,
+    "maxFormsToTest": 0
+  }
+} 

@@ -1,0 +1,63 @@
+{
+  "target": {
+    "url": "http://localhost:8080",
+    "name": "Vue.js Application",
+    "description": "Configuration for Vue.js-based applications"
+  },
+  "auth": {
+    "strategy": "vue",
+    "username": "admin@vue-app.com",
+    "password": "vuepass123",
+    "loginUrl": "/login",
+    "usernameField": "input[v-model*='username']",
+    "passwordField": "input[v-model*='password']",
+    "submitButton": "button[data-cy='login-submit']",
+    "basicAuth": {
+      "enabled": false
+    }
+  },
+  "testTypes": {
+    "unit": { "enabled": true, "timeout": 5000 },
+    "integration": { "enabled": true, "timeout": 15000 },
+    "functional": { "enabled": true, "timeout": 30000 },
+    "e2e": { "enabled": true, "timeout": 60000 },
+    "regression": { "enabled": false },
+    "smoke": { 
+      "enabled": true, 
+      "criticalPaths": ["/", "/login", "/dashboard", "/settings"],
+      "timeout": 30000 
+    },
+    "performance": { 
+      "enabled": true,
+      "thresholds": {
+        "loadTime": 3500,
+        "domContentLoaded": 2000,
+        "firstPaint": 1800,
+        "firstContentfulPaint": 2200
+      }
+    },
+    "load": { "enabled": false },
+    "security": { 
+      "enabled": true,
+      "checks": ["xss", "csrf", "headers"]
+    }
+  },
+  "browser": {
+    "type": "chromium",
+    "headless": false,
+    "slowMo": 150,
+    "timeout": 45000,
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "options": {
+      "args": ["--no-sandbox", "--disable-setuid-sandbox"]
+    }
+  },
+  "global": {
+    "retries": 2,
+    "timeout": 45000,
+    "verbose": true
+  }
+} 

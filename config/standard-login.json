@@ -1,0 +1,62 @@
+{
+  "target": {
+    "url": "https://demo.testfire.net",
+    "name": "Standard Login Form",
+    "description": "Configuration for websites with standard HTML login forms"
+  },
+  "auth": {
+    "strategy": "form",
+    "username": "admin",
+    "password": "admin",
+    "loginUrl": "/login.jsp",
+    "usernameField": "input[name='uid']",
+    "passwordField": "input[name='passw']",
+    "submitButton": "input[name='btnSubmit']",
+    "basicAuth": {
+      "enabled": false
+    }
+  },
+  "testTypes": {
+    "unit": { "enabled": false },
+    "integration": { "enabled": true, "timeout": 15000 },
+    "functional": { "enabled": true, "timeout": 30000 },
+    "e2e": { "enabled": true, "timeout": 60000 },
+    "regression": { "enabled": true, "tolerance": 0.1 },
+    "smoke": { 
+      "enabled": true, 
+      "criticalPaths": ["/", "/login.jsp", "/bank/main.jsp", "/bank/logout.jsp"],
+      "timeout": 30000 
+    },
+    "performance": { 
+      "enabled": true,
+      "thresholds": {
+        "loadTime": 5000,
+        "domContentLoaded": 3000,
+        "firstPaint": 2000
+      }
+    },
+    "load": { "enabled": false },
+    "security": { 
+      "enabled": true,
+      "checks": ["xss", "sqlInjection", "csrf", "headers", "ssl"]
+    }
+  },
+  "browser": {
+    "type": "chromium",
+    "headless": false,
+    "slowMo": 200,
+    "timeout": 45000,
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "options": {
+      "args": ["--no-sandbox", "--disable-setuid-sandbox"]
+    }
+  },
+  "global": {
+    "retries": 3,
+    "timeout": 45000,
+    "verbose": true
+  }
+} 

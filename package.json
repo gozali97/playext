@@ -1,0 +1,60 @@
+{
+  "name": "universal-test-automation-framework",
+  "version": "2.0.0",
+  "description": "Comprehensive Test Automation Framework supporting Unit, Integration, Functional, E2E, Regression, Smoke, Performance, Load, and Security Testing",
+  "main": "src/core/TestRunner.js",
+  "scripts": {
+    "test": "node src/core/TestRunner.js",
+    "test:unit": "node src/core/TestRunner.js --type=unit",
+    "test:integration": "node src/core/TestRunner.js --type=integration",
+    "test:functional": "node src/core/TestRunner.js --type=functional",
+    "test:e2e": "node src/core/TestRunner.js --type=e2e",
+    "test:regression": "node src/core/TestRunner.js --type=regression",
+    "test:smoke": "node src/core/TestRunner.js --type=smoke",
+    "test:performance": "node src/core/TestRunner.js --type=performance",
+    "test:load": "node src/core/TestRunner.js --type=load",
+    "test:security": "node src/core/TestRunner.js --type=security",
+    "test:all": "node src/core/TestRunner.js --type=all",
+    "report": "node src/utils/ReportGenerator.js",
+    "demo": "node demos/demo-comprehensive.js",
+    "setup": "node setup.js"
+  },
+  "keywords": [
+    "test-automation",
+    "playwright",
+    "testing-framework",
+    "unit-testing",
+    "integration-testing",
+    "functional-testing",
+    "e2e-testing",
+    "performance-testing",
+    "load-testing",
+    "security-testing",
+    "regression-testing",
+    "smoke-testing"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "dependencies": {
+    "ajv": "^8.17.1",
+    "axios": "^1.6.0",
+    "chalk": "^4.1.2",
+    "fs-extra": "^11.1.1",
+    "inquirer": "^8.2.6",
+    "joi": "^17.13.3",
+    "lodash": "^4.17.21",
+    "ora": "^5.4.1",
+    "playwright": "^1.40.0",
+    "table": "^6.9.0",
+    "winston": "^3.11.0",
+    "yargs": "^15.3.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.54.0",
+    "jest": "^29.7.0",
+    "prettier": "^3.1.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

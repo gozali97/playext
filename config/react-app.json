@@ -1,0 +1,63 @@
+{
+  "target": {
+    "url": "http://localhost:3000",
+    "name": "React Application",
+    "description": "Configuration for React-based applications"
+  },
+  "auth": {
+    "strategy": "react",
+    "username": "user@example.com",
+    "password": "password123",
+    "loginUrl": "/login",
+    "usernameField": "input[name='email']",
+    "passwordField": "input[name='password']",
+    "submitButton": "button[type='submit']",
+    "basicAuth": {
+      "enabled": false
+    }
+  },
+  "testTypes": {
+    "unit": { "enabled": true, "timeout": 5000 },
+    "integration": { "enabled": true, "timeout": 15000 },
+    "functional": { "enabled": true, "timeout": 30000 },
+    "e2e": { "enabled": true, "timeout": 60000 },
+    "regression": { "enabled": false },
+    "smoke": { 
+      "enabled": true, 
+      "criticalPaths": ["/", "/login", "/dashboard", "/profile"],
+      "timeout": 30000 
+    },
+    "performance": { 
+      "enabled": true,
+      "thresholds": {
+        "loadTime": 4000,
+        "domContentLoaded": 2500,
+        "firstPaint": 2000,
+        "firstContentfulPaint": 2500
+      }
+    },
+    "load": { "enabled": false },
+    "security": { 
+      "enabled": true,
+      "checks": ["xss", "csrf", "headers"]
+    }
+  },
+  "browser": {
+    "type": "chromium",
+    "headless": false,
+    "slowMo": 100,
+    "timeout": 45000,
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "options": {
+      "args": ["--no-sandbox", "--disable-setuid-sandbox"]
+    }
+  },
+  "global": {
+    "retries": 2,
+    "timeout": 45000,
+    "verbose": true
+  }
+} 

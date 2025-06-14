@@ -1,0 +1,56 @@
+{
+  "target": {
+    "url": "https://production-website.com",
+    "name": "Production Environment",
+    "description": "Production environment testing configuration"
+  },
+  "auth": {
+    "username": "prod-user@company.com",
+    "password": "prod-secure-password",
+    "loginUrl": "/login",
+    "usernameField": "#email",
+    "passwordField": "#password",
+    "submitButton": "button[type='submit']",
+    "basicAuth": {
+      "enabled": false,
+      "username": "",
+      "password": ""
+    }
+  },
+  "testTypes": {
+    "unit": { "enabled": false },
+    "integration": { "enabled": true, "timeout": 45000 },
+    "functional": { "enabled": true, "timeout": 90000 },
+    "e2e": { "enabled": true, "timeout": 180000 },
+    "regression": { "enabled": true, "tolerance": 0.05 },
+    "smoke": { 
+      "enabled": true, 
+      "criticalPaths": ["/", "/login", "/dashboard", "/api/health"],
+      "timeout": 45000 
+    },
+    "performance": { 
+      "enabled": true,
+      "thresholds": {
+        "loadTime": 2000,
+        "domContentLoaded": 1500,
+        "firstPaint": 1000
+      }
+    },
+    "load": { 
+      "enabled": true, 
+      "virtualUsers": 50, 
+      "duration": 300000 
+    },
+    "security": { "enabled": true }
+  },
+  "browser": {
+    "type": "chromium",
+    "headless": true,
+    "timeout": 60000
+  },
+  "global": {
+    "retries": 3,
+    "timeout": 60000,
+    "verbose": false
+  }
+} 

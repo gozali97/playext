@@ -1,0 +1,22 @@
+{
+  "timestamp": "2025-06-14T04:14:00.008Z",
+  "config": {
+    "url": "https://klc.k24.co.id/login",
+    "loginMethod": "credentials",
+    "basicAuth": "enabled"
+  },
+  "loginResult": {
+    "method": "credentials",
+    "success": false,
+    "message": "Invalid Username Or Password!"
+  },
+  "testResults": [],
+  "summary": {
+    "totalTests": 0,
+    "passed": 0,
+    "failed": 0,
+    "errors": [
+      "Login gagal"
+    ]
+  }
+}

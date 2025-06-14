@@ -1,0 +1,113 @@
+{
+  "url": "https://klc.k24.co.id/login",
+  "username": "ahmad.gozali@k24.co.id",
+  "password": "multi123T",
+  "useCookie": false,
+  "cookieFile": "auth.json",
+  "saveSession": true,
+  "sessionFile": "auth.json",
+  "browser": {
+    "headless": false,
+    "timeout": 30000,
+    "viewport": {
+      "width": 1366,
+      "height": 768
+    }
+  },
+  
+  "reactMode": {
+    "enabled": true,
+    "comment": "Set to true for React/SPA websites, false for standard websites"
+  },
+  
+  "basicAuth": {
+    "enabled": false,
+    "username": "c",
+    "password": "c"
+  },
+  "delays": {
+    "min": 500,
+    "max": 2000,
+    "beforeSubmit": 2000,
+    "afterSubmit": 3000
+  },
+  "selectors": {
+    "login": {
+      "usernameFields": [
+        "input[name='LoginForm[username]']",
+        "#LoginForm_username",
+        "input[name='username']",
+        "input[name='email']",
+        "input[type='email']",
+        "input[name='login']",
+        "input[name='user']",
+        "input[type='text']",
+        "[data-testid*='username']",
+        "[data-testid*='email']",
+        "#username",
+        "#email",
+        "#login",
+        "#user",
+        ".username",
+        ".email",
+        ".login-input",
+        ".user-input"
+      ],
+      "passwordFields": [
+        "input[name='LoginForm[password]']",
+        "#LoginForm_password",
+        "input[name='password']",
+        "input[type='password']",
+        "[data-testid*='password']",
+        "#password",
+        ".password"
+      ],
+      "submitButtons": [
+        "input[name='yt0']",
+        "input[type='submit']",
+        "button[type='submit']",
+        "[data-testid*='submit']",
+        "[data-testid*='login']",
+        ".login-button",
+        ".submit-button",
+        ".btn-primary"
+      ]
+    },
+    "dashboard": [
+      ".dashboard",
+      "#dashboard",
+      ".main-content",
+      ".user-menu",
+      ".logout",
+      "a[href*='logout']"
+    ]
+  },
+  "security": {
+    "handleCSRF": true,
+    "detectAntiBot": true,
+    "randomDelay": true
+  },
+  "output": {
+    "saveResults": true,
+    "outputDir": "./output",
+    "screenshotOnError": true
+  },
+  "debug": true,
+  "retry": {
+    "maxAttempts": 3,
+    "delay": 2000
+  },
+  "testingOptions": {
+    "forms": {
+      "fillRandom": true,
+      "testValidation": true,
+      "testSecurity": true,
+      "maxFormsToTest": 5
+    },
+    "security": {
+      "checkCSRF": true,
+      "checkXSS": true,
+      "checkSQLInjection": false
+    }
+  }
+} 

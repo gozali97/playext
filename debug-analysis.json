@@ -1,0 +1,94 @@
+{
+  "url": "https://project.k24.co.id/scp",
+  "timestamp": "2025-06-14T04:26:48.517Z",
+  "inputElements": [
+    {
+      "tagName": "INPUT",
+      "type": "text",
+      "name": "LoginForm[username]",
+      "id": "LoginForm_username",
+      "className": "",
+      "placeholder": "Username",
+      "value": "",
+      "required": false,
+      "visible": true,
+      "outerHTML": "<input placeholder=\"Username\" name=\"LoginForm[username]\" id=\"LoginForm_username\" type=\"text\" style=\"\">"
+    },
+    {
+      "tagName": "INPUT",
+      "type": "password",
+      "name": "LoginForm[password]",
+      "id": "LoginForm_password",
+      "className": "showpassword",
+      "placeholder": "Password",
+      "value": "",
+      "required": false,
+      "visible": true,
+      "outerHTML": "<input class=\"showpassword\" placeholder=\"Password\" name=\"LoginForm[password]\" id=\"LoginForm_password\" type=\"password\" style=\"\">"
+    },
+    {
+      "tagName": "INPUT",
+      "type": "checkbox",
+      "name": "",
+      "id": "showPassword",
+      "className": "showpasswordcheckbox",
+      "placeholder": "",
+      "value": "on",
+      "required": false,
+      "visible": false,
+      "outerHTML": "<input type=\"checkbox\" style=\"display: none;\" class=\"showpasswordcheckbox\" id=\"showPassword\">"
+    },
+    {
+      "tagName": "INPUT",
+      "type": "submit",
+      "name": "yt0",
+      "id": "",
+      "className": "log-twitter",
+      "placeholder": "",
+      "value": "Login",
+      "required": false,
+      "visible": true,
+      "outerHTML": "<input class=\"log-twitter\" style=\"width: 100%;\" type=\"submit\" name=\"yt0\" value=\"Login\">"
+    }
+  ],
+  "formElements": [
+    {
+      "action": "https://project.k24.co.id/scp",
+      "method": "post",
+      "id": "login-form",
+      "className": "",
+      "innerHTML": "\t<div class=\"form form-2\">\n\t\t<img src=\"/themes/loginX/images/logo.png\" style=\"width:100px;margin-top: 25px\">\n\t\t<h1><span class=\"sign-up\">User Log in</span></h1>\n\t  \t<p class=\"float\">\n\t   \t\t<label for=\"login\"><i class=\"icon-user\"> Username </i></label>\n\t   \t\t<input placeholder=\"Username\" name=\"LoginForm[username]\" id=\"LoginForm_username\" type=\"text\" style=\"\">\t   \t\t<span class=\"message\" style=\"float:left; color: red\">\n\t\t   \t\t</span></p><div class=\"errorMessage\" id=\"LoginForm_username_em_\" style=\"display:none\"></div>\t\t   \t\n\t  \t<p></p>\n\t\t<p class=\"float\">\n\t\t  <label for=\"password\"><i class=\"icon-lock\"></i> Password</label>\n\t\t  <input class=\"showpassword\" placeholder=\"Password\" name=\"LoginForm[password]\" id=\"LoginForm_password\" type=\"password\" style=\"\">\t\t</p><p class=\"opt\"><input type=\"checkbox\" style=\"display: none;\" class=\"showpasswordcheckbox\" id=\"showPassword\"><label class=\"fa fa-eye-slash\" id=\"togglePassword\" for=\"showPassword\"></label></p>\t\t\t\n  \t\t<p class=\"clearfix\"> \n\t\t   <span class=\"message\" style=\"float:left; color: red\">\t\t   \n\t\t   \t\t</span></p><div class=\"errorMessage\" id=\"LoginForm_password_em_\" style=\"display:none\"></div>\t\t   \n\t\t   <span class=\"clearfix\" style=\"float:right;width: 100%;margin-right: 3px;padding-top: 5px;\">\n\t\t   <input class=\"log-twitter\" style=\"width: 100%;\" type=\"submit\" name=\"yt0\" value=\"Login\">\t\t   </span>\n\t   <p></p>\n\t   <p style=\"text-align: center; font-weight: bold; font-size: 10px; padding-top: 15px;\">\n\t   \t   <!--<span>K24 Pasti Peduli</span><br/>\n\t   \t   <span></span>-->\n\t   </p>   \n\t</div>\t\n"
+    }
+  ],
+  "buttonElements": [
+    {
+      "tagName": "INPUT",
+      "type": "submit",
+      "name": "yt0",
+      "id": "",
+      "className": "log-twitter",
+      "textContent": "",
+      "value": "Login",
+      "visible": true,
+      "outerHTML": "<input class=\"log-twitter\" style=\"width: 100%;\" type=\"submit\" name=\"yt0\" value=\"Login\">"
+    }
+  ],
+  "suggestions": {
+    "usernameFields": [
+      "input[name=\"LoginForm[username]\"]",
+      "#LoginForm_username",
+      "input[name=\"LoginForm[password]\"]",
+      "#LoginForm_password",
+      "input[type=\"password\"]"
+    ],
+    "passwordFields": [
+      "input[name=\"LoginForm[password]\"]",
+      "#LoginForm_password",
+      "input[type=\"password\"]"
+    ],
+    "submitButtons": [
+      "input[name=\"yt0\"]",
+      "input[type=\"submit\"]"
+    ]
+  }
+}

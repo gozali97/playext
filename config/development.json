@@ -1,0 +1,50 @@
+{
+  "target": {
+    "url": "http://localhost:3000",
+    "name": "Development Environment",
+    "description": "Local development testing configuration"
+  },
+  "auth": {
+    "username": "dev@localhost.com",
+    "password": "dev123",
+    "loginUrl": "/login",
+    "usernameField": "#username",
+    "passwordField": "#password",
+    "submitButton": "#login-btn"
+  },
+  "testTypes": {
+    "unit": { "enabled": true, "timeout": 3000 },
+    "integration": { "enabled": true, "timeout": 15000 },
+    "functional": { "enabled": true, "timeout": 30000 },
+    "e2e": { "enabled": true, "timeout": 60000 },
+    "regression": { "enabled": false },
+    "smoke": { 
+      "enabled": true, 
+      "criticalPaths": ["/", "/login", "/dashboard"],
+      "timeout": 20000 
+    },
+    "performance": { 
+      "enabled": true,
+      "thresholds": {
+        "loadTime": 5000,
+        "domContentLoaded": 3000,
+        "firstPaint": 2000
+      }
+    },
+    "load": { 
+      "enabled": false
+    },
+    "security": { "enabled": true }
+  },
+  "browser": {
+    "type": "chromium",
+    "headless": false,
+    "slowMo": 100,
+    "timeout": 30000
+  },
+  "global": {
+    "retries": 1,
+    "timeout": 30000,
+    "verbose": true
+  }
+} 
