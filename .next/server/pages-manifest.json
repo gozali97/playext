@@ -2,10 +2,8 @@
   "/_app": "pages/_app.js",
   "/_error": "pages/_error.js",
   "/_document": "pages/_document.js",
-  "/": "pages/index.js",
-  "/api/dashboard": "pages/api/dashboard.js",
   "/test-runner": "pages/test-runner.js",
-  "/configuration": "pages/configuration.js",
   "/api/config": "pages/api/config.js",
-  "/api/test/run": "pages/api/test/run.js"
+  "/api/test/run": "pages/api/test/run.js",
+  "/configuration": "pages/configuration.js"
 }

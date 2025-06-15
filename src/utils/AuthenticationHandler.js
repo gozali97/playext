@@ -570,10 +570,10 @@ class AuthenticationHandler {
                     this.logger.warn(`⚠️ Page closed before filling ${fieldType} field`);
                     return null;
                 }
-                await element.click();
-                await element.fill(value);
-                this.logger.debug(`✅ Filled ${fieldType} field`);
-                return element;
+            await element.click();
+            await element.fill(value);
+            this.logger.debug(`✅ Filled ${fieldType} field`);
+            return element;
             } catch (error) {
                 this.logger.warn(`⚠️ Error filling ${fieldType} field: ${error.message}`);
                 return null;
@@ -596,11 +596,11 @@ class AuthenticationHandler {
         if (submitButton) {
             try {
                 if (page.isClosed()) return { method: 'none', success: false, error: 'Page closed before submit' };
-                await Promise.all([
-                    page.waitForResponse(response => response.status() !== 304, { timeout: 10000 }).catch(() => null),
-                    submitButton.click()
-                ]);
-                return { method: 'button_click', success: true };
+            await Promise.all([
+                page.waitForResponse(response => response.status() !== 304, { timeout: 10000 }).catch(() => null),
+                submitButton.click()
+            ]);
+            return { method: 'button_click', success: true };
             } catch (error) {
                 return { method: 'button_click', success: false, error: error.message };
             }
@@ -609,13 +609,13 @@ class AuthenticationHandler {
         // Try form submission
         try {
             if (page.isClosed()) return { method: 'none', success: false, error: 'Page closed before form submit' };
-            const form = await page.$('form');
-            if (form) {
-                await Promise.all([
-                    page.waitForResponse(response => response.status() !== 304, { timeout: 10000 }).catch(() => null),
-                    page.keyboard.press('Enter')
-                ]);
-                return { method: 'form_submit', success: true };
+        const form = await page.$('form');
+        if (form) {
+            await Promise.all([
+                page.waitForResponse(response => response.status() !== 304, { timeout: 10000 }).catch(() => null),
+                page.keyboard.press('Enter')
+            ]);
+            return { method: 'form_submit', success: true };
             }
         } catch (error) {
             return { method: 'form_submit', success: false, error: error.message };
@@ -662,11 +662,11 @@ class AuthenticationHandler {
             for (const selector of errorSelectors) {
                 try {
                     if (page.isClosed()) break;
-                    const errorElement = await page.$(selector);
-                    if (errorElement) {
-                        hasErrors = true;
-                        const errorText = await errorElement.textContent();
-                        if (errorText) errorMessages.push(errorText.trim());
+                const errorElement = await page.$(selector);
+                if (errorElement) {
+                    hasErrors = true;
+                    const errorText = await errorElement.textContent();
+                    if (errorText) errorMessages.push(errorText.trim());
                     }
                 } catch (e) {
                     // Continue to next selector if page access fails

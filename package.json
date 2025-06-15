@@ -15,15 +15,13 @@
     "test:load": "node src/core/TestRunner.js --type=load",
     "test:security": "node src/core/TestRunner.js --type=security",
     "test:all": "node src/core/TestRunner.js --type=all",
-    "test:local": "node scripts/test-local.js",
     "report": "node src/utils/ReportGenerator.js",
     "demo": "node demos/demo-comprehensive.js",
     "setup": "node setup.js",
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "gui": "npm run dev",
-    "postinstall": "playwright install --with-deps chromium"
+    "gui": "npm run dev"
   },
   "keywords": [
     "test-automation",
@@ -70,9 +68,7 @@
     "socket.io-client": "^4.7.4",
     "express": "^4.18.2",
     "cors": "^2.8.5",
-    "multer": "^1.4.5-lts.1",
-    "rimraf": "^5.0.5",
-    "sharp": "^0.32.6"
+    "multer": "^1.4.5-lts.1"
   },
   "devDependencies": {
     "eslint": "^8.53.0",
@@ -85,9 +81,6 @@
     "typescript": "^5.2.2"
   },
   "engines": {
-    "node": ">=18.0.0"
-  },
-  "peerDependencies": {
-    "playwright": "^1.40.0"
+    "node": ">=16.0.0"
   }
 }

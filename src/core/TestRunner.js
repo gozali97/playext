@@ -1,20 +1,8 @@
 const fs = require('fs-extra');
 const path = require('path');
+const yargs = require('yargs');
 const chalk = require('chalk');
 const ora = require('ora');
-
-// Conditionally require yargs only if running from CLI
-let yargs = null;
-const isProductionEnv = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
-
-// Only try to require yargs if not in production environment or if explicitly needed
-if (!isProductionEnv || process.argv.length > 2) {
-    try {
-        yargs = require('yargs');
-    } catch (error) {
-        console.warn('⚠️  yargs not available, using programmatic mode');
-    }
-}
 
 const Logger = require('../utils/logger');
 const ReportGenerator = require('../utils/ReportGenerator');
@@ -479,82 +467,52 @@ class TestRunner {
     }
 }
 
-// CLI Configuration (only if yargs is available)
-let argv = {};
-if (yargs) {
-    argv = yargs
-        .option('type', {
-            alias: 't',
-            describe: 'Test type(s) to run',
-            type: 'string',
-            choices: ['unit', 'integration', 'functional', 'e2e', 'regression', 'smoke', 'performance', 'load', 'security', 'all', 'auto'],
-            default: 'auto'
-        })
-        .option('config', {
-            alias: 'c',
-            describe: 'Configuration file path',
-            type: 'string',
-            default: null
-        })
-        .option('html', {
-            describe: 'Generate HTML report',
-            type: 'boolean',
-            default: false
-        })
-        .option('verbose', {
-            alias: 'v',
-            describe: 'Verbose output',
-            type: 'boolean',
-            default: false
-        })
-        .option('headless', {
-            describe: 'Run browser in headless mode',
-            type: 'boolean',
-            default: null
-        })
-        .option('show-browser', {
-            describe: 'Show browser window (opposite of headless)',
-            type: 'boolean',
-            default: false
-        })
-        .help()
-        .alias('help', 'h')
-        .example('$0', 'Run tests based on configuration (auto mode)')
-        .example('$0 --type=smoke', 'Run smoke tests only')
-        .example('$0 --type=unit,integration', 'Run unit and integration tests')
-        .example('$0 --type=all --html', 'Run all tests with HTML report')
-        .example('$0 --config=config/production.json', 'Run with specific configuration')
-        .example('$0 --show-browser', 'Run with visible browser window')
-        .example('$0 --headless', 'Run in headless mode')
-        .argv;
-} else {
-    // Parse command line arguments manually when yargs is not available
-    const args = process.argv.slice(2);
-    argv = {
-        type: 'auto',
-        config: null,
-        html: false,
-        verbose: false,
-        headless: null,
-        'show-browser': false
-    };
-    
-    for (const arg of args) {
-        if (arg.startsWith('--type=')) {
-            argv.type = arg.split('=')[1];
-        } else if (arg.startsWith('--config=')) {
-            argv.config = arg.split('=')[1];
-        } else if (arg === '--html') {
-            argv.html = true;
-        } else if (arg === '--verbose' || arg === '-v') {
-            argv.verbose = true;
-        } else if (arg === '--headless') {
-            argv.headless = true;
-        } else if (arg === '--show-browser') {
-            argv['show-browser'] = true;
-        }
-    }
-}
+// CLI Configuration
+const argv = yargs
+    .option('type', {
+        alias: 't',
+        describe: 'Test type(s) to run',
+        type: 'string',
+        choices: ['unit', 'integration', 'functional', 'e2e', 'regression', 'smoke', 'performance', 'load', 'security', 'all', 'auto'],
+        default: 'auto'
+    })
+    .option('config', {
+        alias: 'c',
+        describe: 'Configuration file path',
+        type: 'string',
+        default: null
+    })
+    .option('html', {
+        describe: 'Generate HTML report',
+        type: 'boolean',
+        default: false
+    })
+    .option('verbose', {
+        alias: 'v',
+        describe: 'Verbose output',
+        type: 'boolean',
+        default: false
+    })
+    .option('headless', {
+        describe: 'Run browser in headless mode',
+        type: 'boolean',
+        default: null
+    })
+    .option('show-browser', {
+        describe: 'Show browser window (opposite of headless)',
+        type: 'boolean',
+        default: false
+    })
+    .help()
+    .alias('help', 'h')
+    .example('$0', 'Run tests based on configuration (auto mode)')
+    .example('$0 --type=smoke', 'Run smoke tests only')
+    .example('$0 --type=unit,integration', 'Run unit and integration tests')
+    .example('$0 --type=all --html', 'Run all tests with HTML report')
+    .example('$0 --config=config/production.json', 'Run with specific configuration')
+    .example('$0 --show-browser', 'Run with visible browser window')
+    .example('$0 --headless', 'Run in headless mode')
+    .argv;
 
 // Main execution
 async function main() {
