@@ -4,12 +4,16 @@ const chalk = require('chalk');
 const ora = require('ora');
 
 // Conditionally require yargs only if running from CLI
-let yargs;
-try {
-    yargs = require('yargs');
-} catch (error) {
-    // yargs not available, will use programmatic mode
-    yargs = null;
+let yargs = null;
+const isProductionEnv = process.env.NODE_ENV === 'production' || process.env.VERCEL === '1';
+
+// Only try to require yargs if not in production environment or if explicitly needed
+if (!isProductionEnv || process.argv.length > 2) {
+    try {
+        yargs = require('yargs');
+    } catch (error) {
+        console.warn('⚠️  yargs not available, using programmatic mode');
+    }
 }
 
 const Logger = require('../utils/logger');

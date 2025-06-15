@@ -3,20 +3,31 @@
   "builds": [
     {
       "src": "package.json",
-      "use": "@vercel/node"
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": ".next"
+      }
     }
   ],
   "functions": {
     "pages/api/**/*.js": {
+      "runtime": "nodejs18.x",
       "maxDuration": 300
     }
   },
   "rewrites": [
     {
       "source": "/((?!api/).*)",
-      "destination": "/index.html"
+      "destination": "/"
     }
   ],
-  "installCommand": "npm install --production=false",
-  "buildCommand": "npm run build"
+  "env": {
+    "NODE_ENV": "production",
+    "PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD": "1"
+  },
+  "installCommand": "npm ci",
+  "buildCommand": "npm run build",
+  "outputDirectory": ".next",
+  "framework": "nextjs",
+  "regions": ["sin1"]
 } 

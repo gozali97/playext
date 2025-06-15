@@ -1,0 +1,297 @@
+{
+  "framework": {
+    "name": "Universal Test Automation Framework",
+    "version": "2.0.0",
+    "startTime": "2025-06-15T06:54:42.734Z",
+    "endTime": "2025-06-15T06:55:11.467Z",
+    "duration": 28733,
+    "configuration": {
+      "target": {
+        "url": "https://kpi.k24.co.id",
+        "name": "Your Application",
+        "description": "Configuration for your application testing"
+      },
+      "auth": {
+        "username": "ahmad.gozali@k24.co.id",
+        "password": "multi123T",
+        "loginUrl": "/scp",
+        "usernameField": "#username",
+        "passwordField": "#password",
+        "submitButton": "#login-button",
+        "basicAuth": {
+          "enabled": false,
+          "username": "",
+          "password": ""
+        },
+        "apiKey": "",
+        "bearerToken": "",
+        "loginSelectors": {}
+      },
+      "testTypes": {
+        "unit": {
+          "enabled": true,
+          "testDir": "src/tests/unit",
+          "pattern": "**/*.test.js",
+          "timeout": 5000
+        },
+        "integration": {
+          "enabled": true,
+          "testDir": "src/tests/integration",
+          "pattern": "**/*.test.js",
+          "timeout": 30000
+        },
+        "functional": {
+          "enabled": true,
+          "testDir": "src/tests/functional",
+          "pattern": "**/*.test.js",
+          "timeout": 60000
+        },
+        "e2e": {
+          "enabled": true,
+          "testDir": "src/tests/e2e",
+          "pattern": "**/*.test.js",
+          "timeout": 120000
+        },
+        "regression": {
+          "enabled": true,
+          "baselineDir": "data/baselines",
+          "compareDir": "data/comparisons",
+          "tolerance": 0.1
+        },
+        "smoke": {
+          "enabled": true,
+          "criticalPaths": [
+            "/dashboard",
+            "/KpiBsc/bscAnswer"
+          ],
+          "timeout": 30000
+        },
+        "performance": {
+          "enabled": true,
+          "metrics": [
+            "loadTime",
+            "domContentLoaded",
+            "firstPaint",
+            "firstContentfulPaint"
+          ],
+          "thresholds": {
+            "loadTime": 3000,
+            "domContentLoaded": 2000,
+            "firstPaint": 1500,
+            "firstContentfulPaint": 2000
+          }
+        },
+        "load": {
+          "enabled": true,
+          "virtualUsers": 10,
+          "duration": 60000,
+          "rampUp": 10000
+        },
+        "security": {
+          "enabled": true,
+          "checks": [
+            "xss",
+            "sqlInjection",
+            "csrf",
+            "headers",
+            "ssl"
+          ],
+          "timeout": 30000
+        }
+      },
+      "browser": {
+        "type": "firefox",
+        "headless": true,
+        "slowMo": 500,
+        "timeout": 30000,
+        "viewport": {
+          "width": 1920,
+          "height": 1080
+        },
+        "options": {
+          "args": [
+            "--no-sandbox",
+            "--disable-setuid-sandbox"
+          ]
+        }
+      },
+      "reporting": {
+        "enabled": true,
+        "formats": [
+          "json",
+          "html"
+        ],
+        "outputDir": "reports",
+        "includeScreenshots": true,
+        "includeVideos": false
+      },
+      "performance": {
+        "metrics": [
+          "loadTime",
+          "domContentLoaded",
+          "firstPaint",
+          "firstContentfulPaint"
+        ],
+        "thresholds": {
+          "loadTime": 3000,
+          "domContentLoaded": 2000,
+          "firstPaint": 1500,
+          "firstContentfulPaint": 2000
+        },
+        "collectNetworkLogs": true,
+        "collectConsoleLogs": true
+      },
+      "security": {
+        "payloads": {
+          "xss": [
+            "<script>alert(\"XSS\")</script>",
+            "\"><script>alert(\"XSS\")</script>",
+            "javascript:alert(\"XSS\")"
+          ],
+          "sqlInjection": [
+            "' OR '1'='1",
+            "'; DROP TABLE users; --",
+            "1' UNION SELECT * FROM users --"
+          ],
+          "csrf": [
+            "../../../etc/passwd",
+            "../../../../windows/system32/drivers/etc/hosts"
+          ]
+        },
+        "headers": [
+          "X-Frame-Options",
+          "X-Content-Type-Options",
+          "X-XSS-Protection",
+          "Strict-Transport-Security",
+          "Content-Security-Policy"
+        ],
+        "ssl": {
+          "checkCertificate": true,
+          "checkProtocols": true
+        }
+      },
+      "global": {
+        "retries": 2,
+        "timeout": 30000,
+        "verbose": true,
+        "parallel": false,
+        "maxConcurrency": 1,
+        "maxWorkers": 4
+      }
+    }
+  },
+  "summary": {
+    "totalTestTypes": 1,
+    "executed": 1,
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "totalTests": 4,
+    "errors": []
+  },
+  "testTypes": {
+    "smoke": {
+      "type": "smoke",
+      "startTime": "2025-06-15T06:54:42.762Z",
+      "endTime": "2025-06-15T06:55:11.466Z",
+      "duration": 28704,
+      "status": "PASSED",
+      "summary": {
+        "totalTests": 4,
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0
+      },
+      "tests": [
+        {
+          "name": "Website Accessibility",
+          "status": "PASSED",
+          "duration": 7896,
+          "result": {
+            "url": "https://kpi.k24.co.id",
+            "title": "Performance Feedback | Dashboard",
+            "status": 200,
+            "hasBasicStructure": true,
+            "jsErrors": 0,
+            "jsErrorDetails": []
+          },
+          "error": null
+        },
+        {
+          "name": "Login Functionality",
+          "status": "PASSED",
+          "duration": 6264,
+          "result": {
+            "loginAttempted": true,
+            "success": true,
+            "strategy": "form",
+            "finalUrl": "https://kpi.k24.co.id/dashboard/admin",
+            "details": {
+              "usernameField": "found",
+              "passwordField": "found",
+              "submitMethod": "button_click",
+              "finalUrl": "https://kpi.k24.co.id/dashboard/admin",
+              "verification": {
+                "success": true,
+                "error": null,
+                "details": {
+                  "currentUrl": "https://kpi.k24.co.id/dashboard/admin",
+                  "title": "Performance Feedback",
+                  "hasErrors": false,
+                  "errorMessages": [],
+                  "successIndicators": 3
+                }
+              }
+            }
+          },
+          "error": null
+        },
+        {
+          "name": "Critical Path: /dashboard",
+          "status": "PASSED",
+          "duration": 5492,
+          "result": {
+            "url": "https://kpi.k24.co.id/dashboard",
+            "status": 200,
+            "title": "Performance Feedback",
+            "hasContent": true,
+            "loadedSuccessfully": true
+          },
+          "error": null
+        },
+        {
+          "name": "Critical Path: /KpiBsc/bscAnswer",
+          "status": "PASSED",
+          "duration": 8858,
+          "result": {
+            "url": "https://kpi.k24.co.id/KpiBsc/bscAnswer",
+            "status": 200,
+            "title": "Performance Feedback",
+            "hasContent": true,
+            "loadedSuccessfully": true
+          },
+          "error": null
+        }
+      ],
+      "metrics": {
+        "duration": 28702,
+        "averageTestTime": 7175.5,
+        "browserInitTime": 0
+      },
+      "errors": []
+    }
+  },
+  "environment": {
+    "nodeVersion": "v20.18.1",
+    "platform": "win32",
+    "architecture": "x64",
+    "memory": {
+      "rss": 81559552,
+      "heapTotal": 40816640,
+      "heapUsed": 25408552,
+      "external": 3473812,
+      "arrayBuffers": 69919
+    },
+    "timestamp": "2025-06-15T06:54:42.762Z"
+  }
+}

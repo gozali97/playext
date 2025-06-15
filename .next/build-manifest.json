@@ -27,20 +27,10 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/analytics": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/analytics.js"
-    ],
     "/configuration": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
       "static/chunks/pages/configuration.js"
-    ],
-    "/reports": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/reports.js"
     ],
     "/test-runner": [
       "static/chunks/webpack.js",
