@@ -1,4 +1,3 @@
-import { spawn } from 'child_process'
 import path from 'path'
 import fs from 'fs-extra'
 
@@ -14,33 +13,6 @@ export default async function handler(req, res) {
       return res.status(400).json({ message: 'Test type is required' })
     }
 
-    // Create temporary config if custom config provided
-    let configPath = path.join(process.cwd(), 'config', 'default.json')
-    if (config) {
-      const tempConfigPath = path.join(process.cwd(), 'config', `temp-${Date.now()}.json`)
-      await fs.writeJson(tempConfigPath, config, { spaces: 2 })
-      configPath = tempConfigPath
-    }
-
-    // Build command arguments
-    const args = [
-      path.join(process.cwd(), 'src', 'core', 'TestRunner.js'),
-      `--config=${configPath}`,
-      `--type=${testType}`
-    ]
-
-    if (options.html) {
-      args.push('--html')
-    }
-
-    if (options.verbose) {
-      args.push('--verbose')
-    }
-
-    if (options.headless !== undefined) {
-      args.push(options.headless ? '--headless' : '--show-browser')
-    }
-
     // Set up response for streaming
     res.writeHead(200, {
       'Content-Type': 'text/event-stream',
@@ -51,94 +23,66 @@ export default async function handler(req, res) {
     })
 
     // Send initial message
-    res.write(`data: ${JSON.stringify({ type: 'start', message: 'Starting test execution...' })}\n\n`)
+    res.write(`data: ${JSON.stringify({ type: 'start', message: 'Memulai eksekusi test...' })}\n\n`)
 
-    // Spawn test process
-    const testProcess = spawn('node', args, {
-      cwd: process.cwd(),
-      stdio: ['ignore', 'pipe', 'pipe']
-    })
+    // Import TestRunner dynamically
+    const TestRunner = require(path.join(process.cwd(), 'src', 'core', 'TestRunner.js'))
+    const testRunner = new TestRunner()
 
-    let output = ''
-    let hasError = false
+    // Prepare test options
+    const testOptions = {
+      type: testType,
+      config: config ? 'custom' : null,
+      html: options.html || false,
+      verbose: options.verbose || false,
+      headless: options.headless
+    }
 
-    // Handle stdout
-    testProcess.stdout.on('data', (data) => {
-      const message = data.toString()
-      output += message
-      res.write(`data: ${JSON.stringify({ type: 'stdout', message: message.trim() })}\n\n`)
-    })
+    // Create temporary config if custom config provided
+    let configPath = null
+    if (config) {
+      configPath = path.join(process.cwd(), 'config', `temp-${Date.now()}.json`)
+      await fs.writeJson(configPath, config, { spaces: 2 })
+      testOptions.config = configPath
+    }
 
-    // Handle stderr
-    testProcess.stderr.on('data', (data) => {
-      const message = data.toString()
-      output += message
-      hasError = true
-      res.write(`data: ${JSON.stringify({ type: 'stderr', message: message.trim() })}\n\n`)
-    })
+    res.write(`data: ${JSON.stringify({ type: 'stdout', message: `Menjalankan test: ${testType}` })}\n\n`)
 
-    // Handle process completion
-    testProcess.on('close', async (code) => {
-      try {
-        // Clean up temporary config
-        if (config && configPath.includes('temp-')) {
-          await fs.remove(configPath)
-        }
+    // Run tests
+    const results = await testRunner.run(testOptions)
 
-        // Find latest report
-        const reportsDir = path.join(process.cwd(), 'reports')
-        const files = await fs.readdir(reportsDir)
-        const reportFiles = files
-          .filter(file => file.startsWith('test-report-') && file.endsWith('.json'))
-          .sort()
-          .reverse()
+    // Clean up temporary config
+    if (configPath && await fs.pathExists(configPath)) {
+      await fs.remove(configPath)
+    }
 
-        let reportData = null
-        if (reportFiles.length > 0) {
-          const latestReport = path.join(reportsDir, reportFiles[0])
-          reportData = await fs.readJson(latestReport)
-        }
+    // Send completion message
+    res.write(`data: ${JSON.stringify({
+      type: 'complete',
+      code: 0,
+      success: true,
+      report: results,
+      message: 'Test execution completed successfully'
+    })}\n\n`)
 
-        // Send completion message
-        res.write(`data: ${JSON.stringify({
-          type: 'complete',
-          code,
-          success: code === 0 && !hasError,
-          report: reportData,
-          message: code === 0 ? 'Test execution completed successfully' : 'Test execution completed with errors'
-        })}\n\n`)
-
-      } catch (error) {
-        res.write(`data: ${JSON.stringify({
-          type: 'error',
-          message: `Error processing results: ${error.message}`
-        })}\n\n`)
-      } finally {
-        res.end()
-      }
-    })
-
-    // Handle process error
-    testProcess.on('error', (error) => {
-      res.write(`data: ${JSON.stringify({
-        type: 'error',
-        message: `Failed to start test process: ${error.message}`
-      })}\n\n`)
-      res.end()
-    })
-
-    // Handle client disconnect
-    req.on('close', () => {
-      if (testProcess && !testProcess.killed) {
-        testProcess.kill('SIGTERM')
-      }
-    })
+    res.end()
 
   } catch (error) {
     console.error('Test execution API error:', error)
-    res.status(500).json({
-      message: 'Failed to execute tests',
-      error: error.message
-    })
+    
+    // Send error message
+    res.write(`data: ${JSON.stringify({
+      type: 'error',
+      message: `Test execution failed: ${error.message}`
+    })}\n\n`)
+
+    res.write(`data: ${JSON.stringify({
+      type: 'complete',
+      code: 1,
+      success: false,
+      message: 'Test execution completed with errors'
+    })}\n\n`)
+
+    res.end()
   }
 } 
