@@ -40,6 +40,62 @@ class TestRunner {
         this.testRunners.set('security', new SecurityTestRunner(this.logger));
     }
 
+    // API-specific method for running tests with pre-loaded config
+    async runTests(config, testTypes = ['e2e']) {
+        const startTime = Date.now();
+        
+        try {
+            this.logger.info('🚀 Starting API test execution...');
+            this.logger.info(`📋 Test Types: ${testTypes.join(', ')}`);
+            
+            // Initialize test results
+            const testResults = {
+                framework: {
+                    name: 'Universal Test Automation Framework',
+                    version: '2.0.0',
+                    startTime: new Date(startTime).toISOString(),
+                    endTime: null,
+                    duration: null,
+                    configuration: config
+                },
+                summary: {
+                    totalTestTypes: testTypes.length,
+                    executed: 0,
+                    passed: 0,
+                    failed: 0,
+                    skipped: 0,
+                    totalTests: 0,
+                    errors: []
+                },
+                testTypes: {},
+                environment: {
+                    nodeVersion: process.version,
+                    platform: process.platform,
+                    architecture: process.arch,
+                    memory: process.memoryUsage(),
+                    timestamp: new Date().toISOString()
+                }
+            };
+
+            // Run tests for each type
+            for (const testType of testTypes) {
+                await this.runTestType(testType, config, testResults);
+            }
+
+            // Finalize results
+            const endTime = Date.now();
+            testResults.framework.endTime = new Date(endTime).toISOString();
+            testResults.framework.duration = endTime - startTime;
+
+            this.logger.info('✅ API test execution completed');
+            return testResults;
+
+        } catch (error) {
+            this.logger.error('❌ API test execution failed:', error);
+            throw error;
+        }
+    }
+
     async run(options = {}) {
         const startTime = Date.now();
         const spinner = ora('Initializing Test Framework...').start();

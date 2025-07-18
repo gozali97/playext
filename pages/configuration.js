@@ -2,12 +2,16 @@ import { useState, useEffect } from 'react'
 import Layout from '../components/Layout'
 import ConfigSection from '../components/ConfigSection'
 import { Save, Download, Upload, RotateCcw } from 'lucide-react'
+import ArrayInput from '../components/ArrayInput'
+import CriticalPathsInput from '../components/CriticalPathsInput'
+import E2EScenarioManager from '../components/E2EScenarioManager'
 
 export default function Configuration() {
   const [config, setConfig] = useState(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState(null)
+  const [activeTab, setActiveTab] = useState('general')
 
   useEffect(() => {
     loadConfiguration()
@@ -96,12 +100,27 @@ export default function Configuration() {
     }
   }
 
-  const updateConfig = (section, value) => {
-    setConfig(prev => ({
-      ...prev,
-      [section]: value
-    }))
+  const updateConfig = (path, value) => {
+    const newConfig = { ...config }
+    const keys = path.split('.')
+    let current = newConfig
+    
+    for (let i = 0; i < keys.length - 1; i++) {
+      if (!current[keys[i]]) current[keys[i]] = {}
+      current = current[keys[i]]
+    }
+    
+    current[keys[keys.length - 1]] = value
+    setConfig(newConfig)
   }
+
+  const tabs = [
+    { id: 'general', label: 'General', icon: '⚙️' },
+    { id: 'testing', label: 'Test Types', icon: '🧪' },
+    { id: 'e2e-scenarios', label: 'E2E Scenarios', icon: '🎬' },
+    { id: 'browser', label: 'Browser', icon: '🌐' },
+    { id: 'reporting', label: 'Reporting', icon: '📊' }
+  ]
 
   if (loading) {
     return (
@@ -175,170 +194,205 @@ export default function Configuration() {
           </div>
         )}
 
-        {/* Configuration Sections */}
-        {config && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Target Configuration */}
-            <ConfigSection
-              title="🎯 Target Application"
-              description="Konfigurasi aplikasi yang akan ditest"
-              config={config.target}
-              fields={[
-                { key: 'url', label: 'Application URL', type: 'url', required: true },
-                { key: 'name', label: 'Application Name', type: 'text', required: true },
-                { key: 'description', label: 'Description', type: 'textarea' }
-              ]}
-              onUpdate={(value) => updateConfig('target', value)}
-            />
+        {/* Tab Navigation */}
+        <div className="border-b border-gray-200 mb-6">
+          <nav className="-mb-px flex space-x-8">
+            {tabs.map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`py-2 px-1 border-b-2 font-medium text-sm ${
+                  activeTab === tab.id
+                    ? 'border-blue-500 text-blue-600'
+                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                }`}
+              >
+                <span className="mr-2">{tab.icon}</span>
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </div>
 
-            {/* Authentication Configuration */}
-            <ConfigSection
-              title="🔐 Authentication"
-              description="Setup kredensial login dan metode autentikasi"
-              config={config.auth}
-              fields={[
-                { key: 'username', label: 'Username/Email', type: 'text', required: true },
-                { key: 'password', label: 'Password', type: 'password', required: true },
-                { key: 'loginUrl', label: 'Login URL Path', type: 'text', placeholder: '/login' },
-                { key: 'usernameField', label: 'Username Field Selector', type: 'text', placeholder: '#username' },
-                { key: 'passwordField', label: 'Password Field Selector', type: 'text', placeholder: '#password' },
-                { key: 'submitButton', label: 'Submit Button Selector', type: 'text', placeholder: '#login-button' }
-              ]}
-              onUpdate={(value) => updateConfig('auth', value)}
-            />
+        {/* Tab Content */}
+        <div className="space-y-6">
+          {activeTab === 'general' && (
+            <div className="space-y-6">
+              <ConfigSection
+                title="🎯 Target Application"
+                description="Konfigurasi aplikasi yang akan ditest"
+                config={config.target}
+                fields={[
+                  { key: 'url', label: 'Application URL', type: 'url', required: true },
+                  { key: 'name', label: 'Application Name', type: 'text', required: true },
+                  { key: 'description', label: 'Description', type: 'textarea' }
+                ]}
+                onUpdate={(value) => updateConfig('target', value)}
+              />
 
-            {/* Browser Configuration */}
-            <ConfigSection
-              title="🌐 Browser Settings"
-              description="Konfigurasi perilaku browser"
-              config={config.browser}
-              fields={[
-                { 
-                  key: 'type', 
-                  label: 'Browser Type', 
-                  type: 'select', 
-                  options: [
-                    { value: 'chromium', label: 'Chromium' },
-                    { value: 'firefox', label: 'Firefox' },
-                    { value: 'webkit', label: 'WebKit' }
-                  ]
-                },
-                { key: 'headless', label: 'Headless Mode', type: 'checkbox' },
-                { key: 'slowMo', label: 'Slow Motion (ms)', type: 'number', min: 0, max: 5000 },
-                { key: 'timeout', label: 'Timeout (ms)', type: 'number', min: 5000, max: 120000 }
-              ]}
-              onUpdate={(value) => updateConfig('browser', value)}
-            />
+              <ConfigSection
+                title="🔐 Authentication"
+                description="Setup kredensial login dan metode autentikasi"
+                config={config.auth}
+                fields={[
+                  { key: 'username', label: 'Username/Email', type: 'text', required: true },
+                  { key: 'password', label: 'Password', type: 'password', required: true },
+                  { key: 'loginUrl', label: 'Login URL Path', type: 'text', placeholder: '/login' },
+                  { key: 'usernameField', label: 'Username Field Selector', type: 'text', placeholder: '#username' },
+                  { key: 'passwordField', label: 'Password Field Selector', type: 'text', placeholder: '#password' },
+                  { key: 'submitButton', label: 'Submit Button Selector', type: 'text', placeholder: '#login-button' }
+                ]}
+                onUpdate={(value) => updateConfig('auth', value)}
+              />
+            </div>
+          )}
 
-            {/* Smoke Test Configuration */}
-            <ConfigSection
-              title="💨 Smoke Test Settings"
-              description="Konfigurasi smoke test dan critical paths"
-              config={config.testTypes?.smoke || {}}
-              baseUrl={config.target?.url || ""}
-              fields={[
-                { key: 'enabled', label: 'Enable Smoke Tests', type: 'checkbox' },
-                { key: 'timeout', label: 'Timeout (ms)', type: 'number', min: 5000, max: 120000 },
-                { 
-                  key: 'criticalPaths', 
-                  label: 'Critical Paths', 
-                  type: 'array',
-                  placeholder: 'Masukkan path (contoh: /login, /dashboard)',
-                  itemType: 'text',
-                  addButtonText: 'Tambah Path',
-                  description: 'Daftar path yang critical untuk aplikasi. Contoh: /login, /dashboard, /profile'
-                }
-              ]}
-              onUpdate={(value) => updateConfig('testTypes', { ...config.testTypes, smoke: value })}
-            />
+          {activeTab === 'testing' && (
+            <div className="space-y-6">
+              {/* Test Types Configuration */}
+              {Object.entries(config.testTypes || {}).map(([testType, testConfig]) => (
+                <ConfigSection
+                  key={testType}
+                  title={`${testType.toUpperCase()} Tests`}
+                  icon="🧪"
+                >
+                  <div className="flex items-center space-x-4 mb-4">
+                    <label className="flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={testConfig.enabled || false}
+                        onChange={(e) => updateConfig(`testTypes.${testType}.enabled`, e.target.checked)}
+                        className="mr-2"
+                      />
+                      <span className="font-medium">Enable {testType.toUpperCase()} Tests</span>
+                    </label>
+                  </div>
 
-            {/* Test Types Configuration */}
-            <ConfigSection
-              title="🧪 Test Types"
-              description="Enable/disable dan konfigurasi jenis test"
-              config={config.testTypes}
-              fields={Object.entries(config.testTypes || {})
-                .filter(([key]) => key !== 'smoke') // Exclude smoke since it has its own section
-                .map(([key, testType]) => ({
-                  key,
-                  label: key.charAt(0).toUpperCase() + key.slice(1),
-                  type: 'object',
-                  enabled: testType.enabled,
-                  subFields: [
-                    { key: 'enabled', label: 'Enabled', type: 'checkbox' },
-                    { key: 'timeout', label: 'Timeout (ms)', type: 'number', min: 1000 }
-                  ]
-                }))}
-              onUpdate={(value) => updateConfig('testTypes', { ...value, smoke: config.testTypes.smoke })}
-            />
+                  {testConfig.enabled && (
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Test Directory
+                        </label>
+                        <input
+                          type="text"
+                          value={testConfig.testDir || ''}
+                          onChange={(e) => updateConfig(`testTypes.${testType}.testDir`, e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          File Pattern
+                        </label>
+                        <input
+                          type="text"
+                          value={testConfig.pattern || ''}
+                          onChange={(e) => updateConfig(`testTypes.${testType}.pattern`, e.target.value)}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Timeout (ms)
+                        </label>
+                        <input
+                          type="number"
+                          value={testConfig.timeout || 30000}
+                          onChange={(e) => updateConfig(`testTypes.${testType}.timeout`, parseInt(e.target.value))}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                        />
+                      </div>
+                    </div>
+                  )}
 
-            {/* Performance Configuration */}
-            <ConfigSection
-              title="⚡ Performance Settings"
-              description="Konfigurasi threshold performance test"
-              config={config.performance}
-              fields={[
-                { key: 'collectNetworkLogs', label: 'Collect Network Logs', type: 'checkbox' },
-                { key: 'collectConsoleLogs', label: 'Collect Console Logs', type: 'checkbox' },
-                { 
-                  key: 'thresholds', 
-                  label: 'Performance Thresholds', 
-                  type: 'object',
-                  subFields: [
-                    { key: 'loadTime', label: 'Load Time (ms)', type: 'number', min: 500 },
-                    { key: 'domContentLoaded', label: 'DOM Content Loaded (ms)', type: 'number', min: 500 },
-                    { key: 'firstPaint', label: 'First Paint (ms)', type: 'number', min: 500 },
-                    { key: 'firstContentfulPaint', label: 'First Contentful Paint (ms)', type: 'number', min: 500 }
-                  ]
-                }
-              ]}
-              onUpdate={(value) => updateConfig('performance', value)}
-            />
+                  {/* Special configurations for specific test types */}
+                  {testType === 'smoke' && testConfig.enabled && (
+                    <div className="mt-4">
+                      <CriticalPathsInput
+                        paths={testConfig.criticalPaths || []}
+                        onChange={(paths) => updateConfig(`testTypes.${testType}.criticalPaths`, paths)}
+                      />
+                    </div>
+                  )}
 
-            {/* Security Configuration */}
-            <ConfigSection
-              title="🔒 Security Settings"
-              description="Konfigurasi security test checks"
-              config={config.security}
-              fields={[
-                { 
-                  key: 'checks', 
-                  label: 'Security Checks', 
-                  type: 'array',
-                  placeholder: 'Masukkan jenis security check',
-                  itemType: 'text',
-                  addButtonText: 'Tambah Check',
-                  description: 'Jenis security test yang akan dijalankan'
-                },
-                { 
-                  key: 'headers', 
-                  label: 'Security Headers', 
-                  type: 'array',
-                  placeholder: 'Masukkan nama header',
-                  itemType: 'text',
-                  addButtonText: 'Tambah Header',
-                  description: 'Security headers yang akan dicek'
-                }
-              ]}
-              onUpdate={(value) => updateConfig('security', value)}
-            />
+                  {testType === 'performance' && testConfig.enabled && (
+                    <div className="mt-4">
+                      <ArrayInput
+                        label="Performance Metrics"
+                        values={testConfig.metrics || []}
+                        onChange={(metrics) => updateConfig(`testTypes.${testType}.metrics`, metrics)}
+                        placeholder="Add metric (e.g., loadTime)"
+                      />
+                    </div>
+                  )}
+                </ConfigSection>
+              ))}
+            </div>
+          )}
 
-            {/* Global Configuration */}
-            <ConfigSection
-              title="🌍 Global Settings"
-              description="Pengaturan umum eksekusi test"
-              config={config.global}
-              fields={[
-                { key: 'retries', label: 'Test Retries', type: 'number', min: 0, max: 5 },
-                { key: 'timeout', label: 'Global Timeout (ms)', type: 'number', min: 10000 },
-                { key: 'verbose', label: 'Verbose Logging', type: 'checkbox' },
-                { key: 'parallel', label: 'Parallel Execution', type: 'checkbox' },
-                { key: 'maxConcurrency', label: 'Max Concurrency', type: 'number', min: 1, max: 10 }
-              ]}
-              onUpdate={(value) => updateConfig('global', value)}
+          {activeTab === 'e2e-scenarios' && (
+            <E2EScenarioManager 
+              config={config}
+              onConfigChange={setConfig}
             />
-          </div>
-        )}
+          )}
+
+          {activeTab === 'browser' && (
+            <div className="space-y-6">
+              <ConfigSection
+                title="🌐 Browser Settings"
+                description="Konfigurasi perilaku browser"
+                config={config.browser}
+                fields={[
+                  { 
+                    key: 'type', 
+                    label: 'Browser Type', 
+                    type: 'select', 
+                    options: [
+                      { value: 'chromium', label: 'Chromium' },
+                      { value: 'firefox', label: 'Firefox' },
+                      { value: 'webkit', label: 'WebKit' }
+                    ]
+                  },
+                  { key: 'headless', label: 'Headless Mode', type: 'checkbox' },
+                  { key: 'slowMo', label: 'Slow Motion (ms)', type: 'number', min: 0, max: 5000 },
+                  { key: 'timeout', label: 'Timeout (ms)', type: 'number', min: 5000, max: 120000 }
+                ]}
+                onUpdate={(value) => updateConfig('browser', value)}
+              />
+
+              <ConfigSection
+                title="🌐 Browser Viewport"
+                description="Konfigurasi ukuran viewport browser"
+                config={config.browser?.viewport}
+                fields={[
+                  { key: 'width', label: 'Viewport Width', type: 'number', min: 800, max: 4096 },
+                  { key: 'height', label: 'Viewport Height', type: 'number', min: 600, max: 2160 }
+                ]}
+                onUpdate={(value) => updateConfig('browser.viewport', value)}
+              />
+            </div>
+          )}
+
+          {activeTab === 'reporting' && (
+            <div className="space-y-6">
+              <ConfigSection
+                title="📊 Reporting Configuration"
+                description="Konfigurasi pengaturan laporan"
+                config={config.reporting}
+                fields={[
+                  { key: 'enabled', label: 'Enable Reporting', type: 'checkbox' },
+                  { key: 'outputDir', label: 'Output Directory', type: 'text', placeholder: 'reports' },
+                  { key: 'formats', label: 'Report Formats', type: 'array', placeholder: 'Add format (json, html, xml)' },
+                  { key: 'includeScreenshots', label: 'Include Screenshots', type: 'checkbox' },
+                  { key: 'includeVideos', label: 'Include Videos', type: 'checkbox' }
+                ]}
+                onUpdate={(value) => updateConfig('reporting', value)}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </Layout>
   )

@@ -1,10 +1,10 @@
-const { chromium } = require('playwright');
+const { chromium, firefox, webkit } = require('playwright');
 const fs = require('fs-extra');
 const path = require('path');
 
 /**
- * End-to-End Test Runner
- * Menguji seluruh alur aplikasi dari awal hingga akhir, seperti dari login hingga checkout
+ * Enhanced End-to-End Test Runner
+ * Mendukung scenario testing yang dinamis dan dapat dikonfigurasi
  */
 class E2ETestRunner {
     constructor(logger) {
@@ -12,10 +12,12 @@ class E2ETestRunner {
         this.type = 'e2e';
         this.browser = null;
         this.context = null;
+        this.variables = {};
+        this.playwright = { chromium, firefox, webkit };
     }
 
     async run(config) {
-        this.logger.info('🌐 Starting E2E Tests...');
+        this.logger.info('🌐 Starting Enhanced E2E Tests...');
         
         const e2eConfig = config.testTypes?.e2e || {};
         if (!e2eConfig.enabled) {
@@ -28,40 +30,111 @@ class E2ETestRunner {
             };
         }
 
-        // Basic E2E test implementation
+        try {
+            // Initialize browser
+            await this.setupBrowser(config);
+            
+            // Initialize variables for template substitution
+            this.initializeVariables(config);
+            
+            // Run E2E scenarios
+            const results = await this.runE2EScenarios(config, e2eConfig);
+            
+            return {
+                success: results.failed === 0,
+                summary: {
+                    totalTests: results.total,
+                    passed: results.passed,
+                    failed: results.failed,
+                    skipped: results.skipped
+                },
+                tests: results.tests,
+                metrics: {
+                    duration: results.duration || 0,
+                    scenarios: results.scenarios || 0
+                },
+                errors: results.errors || []
+            };
+            
+        } catch (error) {
+            this.logger.error('E2E Test Runner Error:', error);
         return {
-            success: true,
-            summary: { totalTests: 1, passed: 1, failed: 0, skipped: 0 },
-            tests: [{ name: 'Basic E2E Test', status: 'PASSED', duration: 200 }],
-            metrics: { duration: 200 },
-            errors: []
-        };
+                success: false,
+                summary: { totalTests: 0, passed: 0, failed: 1, skipped: 0 },
+                tests: [],
+                metrics: {},
+                errors: [error.message]
+            };
+        } finally {
+            await this.cleanup();
+        }
     }
 
-    async initializeBrowser(config) {
-        this.browser = await chromium.launch({
-            headless: config.browser?.headless !== false,
-            slowMo: config.browser?.slowMo || 100, // Slower for E2E
-            args: config.browser?.options?.args || ['--no-sandbox']
+    async setupBrowser(config) {
+        const browserConfig = config.browser || {};
+        
+        this.browser = await this.playwright[browserConfig.type || 'chromium'].launch({
+            headless: browserConfig.headless !== false,
+            slowMo: browserConfig.slowMo || 0,
+            timeout: browserConfig.timeout || 30000,
+            args: browserConfig.options?.args || []
         });
 
+        // Extract HTTP Basic Auth credentials from E2E scenarios
+        const httpCredentials = this.extractHttpBasicAuthCredentials(config);
+        
         this.context = await this.browser.newContext({
-            viewport: config.browser?.viewport || { width: 1920, height: 1080 },
-            userAgent: 'Universal Test Automation Framework - E2E Tests',
-            recordVideo: config.reporting?.includeVideos ? { dir: 'reports/videos' } : undefined,
-            ...(config.auth?.basicAuth?.enabled && {
+            viewport: browserConfig.viewport || { width: 1920, height: 1080 },
+            ignoreHTTPSErrors: true,
+            // Add HTTP authentication if basic auth is enabled but not form-based
+            ...(config.auth?.basicAuth?.enabled && !config.auth.basicAuth.formBased && {
                 httpCredentials: {
                     username: config.auth.basicAuth.username,
                     password: config.auth.basicAuth.password
                 }
-            })
+            }),
+            // Add HTTP credentials from step-level basic auth
+            ...(httpCredentials && { httpCredentials })
         });
 
-        // Enable tracing if needed
+        this.page = await this.context.newPage();
+        
+        // Enable tracing if configured
+        if (config.testTypes?.e2e?.globalSettings?.tracing) {
         await this.context.tracing.start({ screenshots: true, snapshots: true });
+        }
+    }
+
+    extractHttpBasicAuthCredentials(config) {
+        // Look for HTTP Basic Auth credentials in E2E scenarios
+        const scenarios = config.testTypes?.e2e?.scenarios || [];
+        
+        for (const scenario of scenarios) {
+            for (const step of scenario.steps || []) {
+                if (step.type === 'navigate' && step.basicAuth?.enabled) {
+                    this.logger.info(`🔐 Found HTTP Basic Auth credentials in scenario: ${scenario.name}`);
+                    return {
+                        username: step.basicAuth.username,
+                        password: step.basicAuth.password
+                    };
+                }
+            }
+        }
+        
+        return null;
+    }
+
+    initializeVariables(config) {
+        this.variables = {
+            auth: config.auth || {},
+            target: config.target || {},
+            custom: config.variables?.custom || {},
+            browser: config.browser || {}
+        };
     }
 
     async runE2EScenarios(config, e2eConfig) {
+        const startTime = Date.now();
         const results = {
             total: 0,
             passed: 0,
@@ -69,69 +142,76 @@ class E2ETestRunner {
             skipped: 0,
             tests: [],
             errors: [],
-            scenarios: 0
+            scenarios: 0,
+            duration: 0
         };
 
-        // Load test scenarios
-        const scenarios = await this.loadE2EScenarios(e2eConfig);
+        // Get scenarios from config
+        const allScenarios = e2eConfig.scenarios || [];
         
-        if (scenarios.length === 0) {
-            // Create default scenarios if none exist
-            scenarios.push(...this.getDefaultScenarios(config));
+        if (allScenarios.length === 0) {
+            this.logger.warn('No E2E scenarios found in configuration');
+            return results;
         }
 
-        results.scenarios = scenarios.length;
+        // Determine which scenarios to run
+        let scenariosToRun = [];
+        
+        if (e2eConfig.runOnlySelected && e2eConfig.selectedScenarios && e2eConfig.selectedScenarios.length > 0) {
+            // Run only selected scenarios
+            scenariosToRun = allScenarios.filter(scenario => 
+                e2eConfig.selectedScenarios.includes(scenario.id)
+            );
+            this.logger.info(`🎯 Running selected scenarios: ${e2eConfig.selectedScenarios.join(', ')}`);
+        } else {
+            // Check if we should run only main scenario
+            const mainScenarios = allScenarios.filter(scenario => scenario.isMainScenario);
+            
+            if (mainScenarios.length > 0) {
+                scenariosToRun = mainScenarios;
+                this.logger.info(`🌟 Running main scenarios: ${mainScenarios.map(s => s.name).join(', ')}`);
+            } else {
+                // Run all enabled scenarios
+                scenariosToRun = allScenarios.filter(scenario => scenario.enabled);
+                this.logger.info(`🚀 Running all enabled scenarios`);
+            }
+        }
+        
+        if (scenariosToRun.length === 0) {
+            this.logger.warn('No scenarios to run based on current selection criteria');
+            return results;
+        }
+
+        results.scenarios = scenariosToRun.length;
+        this.logger.info(`Found ${scenariosToRun.length} scenarios to run`);
 
         // Run each scenario
-        for (const scenario of scenarios) {
+        for (const scenario of scenariosToRun) {
+            if (!scenario.enabled) {
+                this.logger.info(`⏭️  Skipping disabled scenario: ${scenario.name}`);
+                results.skipped++;
+                continue;
+            }
+
             const scenarioResult = await this.runScenario(scenario, config);
             
-            // Add scenario results to overall results
+            // Merge results
             results.tests.push(...scenarioResult.tests);
             results.total += scenarioResult.total;
             results.passed += scenarioResult.passed;
             results.failed += scenarioResult.failed;
             results.skipped += scenarioResult.skipped;
             results.errors.push(...scenarioResult.errors);
+
+            // Stop on critical failure
+            if (scenarioResult.failed > 0 && scenario.critical) {
+                this.logger.error(`❌ Critical scenario failed: ${scenario.name}`);
+                break;
+            }
         }
 
+        results.duration = Date.now() - startTime;
         return results;
-    }
-
-    async loadE2EScenarios(config) {
-        const testDir = path.resolve(config.testDir || 'src/tests/e2e');
-        const scenarios = [];
-        
-        try {
-            await fs.ensureDir(testDir);
-            
-            const files = await fs.readdir(testDir);
-            const scenarioFiles = files.filter(file => file.endsWith('.scenario.js'));
-            
-            for (const file of scenarioFiles) {
-                try {
-                    const filePath = path.join(testDir, file);
-                    delete require.cache[require.resolve(filePath)];
-                    const scenario = require(filePath);
-                    scenarios.push({
-                        name: path.basename(file, '.scenario.js'),
-                        ...scenario
-                    });
-                } catch (error) {
-                    this.logger.warn(`Failed to load E2E scenario: ${file}`, error);
-                }
-            }
-            
-            // Create example scenarios if directory is empty
-            if (scenarioFiles.length === 0) {
-                await this.createExampleScenarios(testDir);
-            }
-            
-        } catch (error) {
-            this.logger.error('Failed to load E2E scenarios:', error);
-        }
-        
-        return scenarios;
     }
 
     async runScenario(scenario, config) {
@@ -146,23 +226,23 @@ class E2ETestRunner {
 
         this.logger.info(`🎬 Running E2E Scenario: ${scenario.name}`);
         
+        // Store config for use in step execution
+        this.config = config;
+        
         const page = await this.context.newPage();
         
         try {
-            // Run scenario setup if exists
-            if (scenario.setup && typeof scenario.setup === 'function') {
-                await scenario.setup(page, config);
-            }
-
             // Run scenario steps
             const steps = scenario.steps || [];
             for (let i = 0; i < steps.length; i++) {
                 const step = steps[i];
-                const stepResult = await this.runScenarioStep(step, page, config, i + 1);
+                const stepResult = await this.runScenarioStep(step, page, config, scenario, i + 1);
                 
                 results.tests.push({
                     scenario: scenario.name,
+                    scenarioId: scenario.id,
                     step: i + 1,
+                    stepId: step.id,
                     ...stepResult
                 });
                 
@@ -172,17 +252,14 @@ class E2ETestRunner {
                     results.passed++;
                 } else if (stepResult.status === 'FAILED') {
                     results.failed++;
-                    results.errors.push(`${scenario.name} Step ${i + 1}: ${stepResult.error}`);
+                    results.errors.push(`${scenario.name} Step ${i + 1} (${step.id}): ${stepResult.error}`);
                     
                     // Take screenshot on failure
-                    if (config.reporting?.includeScreenshots) {
-                        const screenshotPath = `reports/screenshots/${scenario.name}-step-${i + 1}-failure.png`;
-                        await fs.ensureDir(path.dirname(screenshotPath));
-                        await page.screenshot({ path: screenshotPath });
-                    }
+                    await this.takeScreenshotOnFailure(page, scenario, step, i + 1, config);
                     
                     // Stop scenario on critical failure
                     if (step.critical !== false) {
+                        this.logger.error(`💥 Critical step failed, stopping scenario: ${step.name}`);
                         break;
                     }
                 } else {
@@ -190,14 +267,10 @@ class E2ETestRunner {
                 }
             }
 
-            // Run scenario teardown if exists
-            if (scenario.teardown && typeof scenario.teardown === 'function') {
-                await scenario.teardown(page, config);
-            }
-
         } catch (error) {
             results.failed++;
             results.errors.push(`Scenario ${scenario.name}: ${error.message}`);
+            this.logger.error(`Scenario execution error: ${error.message}`);
         } finally {
             await page.close();
         }
@@ -205,229 +278,504 @@ class E2ETestRunner {
         return results;
     }
 
-    async runScenarioStep(step, page, config, stepNumber) {
+    async runScenarioStep(step, page, config, scenario, stepNumber) {
         const startTime = Date.now();
         
         try {
-            this.logger.debug(`  Step ${stepNumber}: ${step.description || step.name}`);
+            this.logger.info(`  📋 Step ${stepNumber}: ${step.name} (${step.type})`);
             
-            if (!step.action || typeof step.action !== 'function') {
-                throw new Error('Invalid step: missing action function');
+            // Substitute variables in step configuration
+            const processedStep = this.substituteVariables(step);
+            
+            // Execute step based on type
+            let result;
+            switch (processedStep.type) {
+                case 'navigate':
+                    result = await this.executeNavigateStep(processedStep, page);
+                    break;
+                case 'click':
+                    result = await this.executeClickStep(processedStep, page);
+                    break;
+                case 'fill':
+                    result = await this.executeFillStep(processedStep, page);
+                    break;
+                case 'fill_form':
+                    result = await this.executeFillFormStep(processedStep, page);
+                    break;
+                case 'verify':
+                    result = await this.executeVerifyStep(processedStep, page);
+                    break;
+                case 'wait':
+                    result = await this.executeWaitStep(processedStep, page);
+                    break;
+                case 'execute_scenario':
+                    result = await this.executeScenarioStep(processedStep, page, config);
+                    break;
+                case 'custom':
+                    result = await this.executeCustomStep(processedStep, page);
+                    break;
+                default:
+                    throw new Error(`Unknown step type: ${processedStep.type}`);
             }
-
-            // Set timeout for step
-            const timeout = step.timeout || config.timeout || 30000;
             
-            // Run step action with timeout
-            const result = await Promise.race([
-                step.action(page, config),
-                new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error('Step timeout')), timeout)
-                )
-            ]);
+            // Run assertions if present
+            if (processedStep.assertions && processedStep.assertions.length > 0) {
+                await this.runAssertions(processedStep.assertions, page);
+            }
             
-            const endTime = Date.now();
+            const duration = Date.now() - startTime;
             
             return {
-                name: step.description || step.name || `Step ${stepNumber}`,
+                name: processedStep.name,
+                type: processedStep.type,
                 status: 'PASSED',
-                duration: endTime - startTime,
-                result: result,
-                error: null
+                duration,
+                details: result
             };
 
         } catch (error) {
-            const endTime = Date.now();
+            const duration = Date.now() - startTime;
+            this.logger.error(`  ❌ Step ${stepNumber} failed: ${error.message}`);
             
             return {
-                name: step.description || step.name || `Step ${stepNumber}`,
+                name: step.name,
+                type: step.type,
                 status: 'FAILED',
-                duration: endTime - startTime,
-                result: null,
+                duration,
                 error: error.message
             };
         }
     }
 
-    getDefaultScenarios(config) {
-        return [
-            {
-                name: 'user-login-flow',
-                description: 'Complete user login flow',
-                steps: [
-                    {
-                        name: 'navigate-to-homepage',
-                        description: 'Navigate to homepage',
-                        action: async (page, config) => {
-                            await page.goto(config.target.url, { waitUntil: 'networkidle' });
-                            const title = await page.title();
-                            return { title, url: page.url() };
-                        }
-                    },
-                    {
-                        name: 'login-user',
-                        description: 'Login with user credentials',
-                        action: async (page, config) => {
-                            if (!config.auth?.username) return { skipped: true };
-                            
-                            // Find and fill login form
-                            const usernameSelector = 'input[name="username"], #username, input[type="email"]';
-                            const passwordSelector = 'input[name="password"], #password';
-                            const submitSelector = 'input[type="submit"], button[type="submit"]';
-                            
-                            await page.fill(usernameSelector, config.auth.username);
-                            await page.fill(passwordSelector, config.auth.password);
-                            await page.click(submitSelector);
-                            
-                            // Wait for navigation or response
-                            await page.waitForLoadState('networkidle');
-                            
-                            return { loggedIn: true, url: page.url() };
-                        }
-                    },
-                    {
-                        name: 'verify-login-success',
-                        description: 'Verify successful login',
-                        action: async (page, config) => {
-                            // Look for success indicators
-                            const hasErrorMessage = await page.$('.error, .alert-danger') !== null;
-                            if (hasErrorMessage) {
-                                throw new Error('Login failed - error message detected');
-                            }
-                            
-                            // Check if URL changed (indicating successful login)
-                            const currentUrl = page.url();
-                            const urlChanged = !currentUrl.includes('/login');
-                            
-                            return { success: true, urlChanged, currentUrl };
-                        }
-                    }
-                ]
-            }
-        ];
-    }
-
-    async createExampleScenarios(testDir) {
-        const exampleScenarios = [
-            {
-                name: 'complete-user-journey.scenario.js',
-                content: `
-// Complete User Journey E2E Test Scenario
-module.exports = {
-    name: 'Complete User Journey',
-    description: 'Tests the complete user journey from landing to main action',
-    
-    setup: async (page, config) => {
-        // Setup code before scenario runs
-        console.log('Setting up user journey scenario...');
-    },
-    
-    steps: [
-        {
-            name: 'land-on-homepage',
-            description: 'User lands on homepage',
-            action: async (page, config) => {
-                await page.goto(config.target.url);
-                await page.waitForLoadState('networkidle');
-                
-                const title = await page.title();
-                if (!title) throw new Error('Homepage has no title');
-                
-                return { title, loaded: true };
-            }
-        },
-        {
-            name: 'navigate-to-login',
-            description: 'Navigate to login page',
-            action: async (page, config) => {
-                // Look for login link
-                const loginLink = await page.$('a[href*="login"], .login-link, #login');
-                if (loginLink) {
-                    await loginLink.click();
-                    await page.waitForLoadState('networkidle');
-                }
-                
-                return { navigatedToLogin: true, url: page.url() };
-            }
-        },
-        {
-            name: 'perform-login',
-            description: 'Perform user login',
-            action: async (page, config) => {
-                if (!config.auth?.username) return { skipped: true };
-                
-                // Fill login form
-                await page.fill('input[name="username"], #username', config.auth.username);
-                await page.fill('input[name="password"], #password', config.auth.password);
-                
-                // Submit form
-                await Promise.all([
-                    page.waitForLoadState('networkidle'),
-                    page.click('input[type="submit"], button[type="submit"]')
-                ]);
-                
-                return { loginAttempted: true, url: page.url() };
-            }
-        },
-        {
-            name: 'verify-user-dashboard',
-            description: 'Verify user can access dashboard',
-            action: async (page, config) => {
-                // Check if we're on a dashboard or user area
-                const isDashboard = await page.url();
-                const hasUserContent = await page.$('.dashboard, .user-area, #main-content') !== null;
-                
-                if (!hasUserContent) {
-                    throw new Error('User dashboard not accessible');
-                }
-                
-                return { dashboardAccessible: true, hasUserContent };
-            }
-        }
-    ],
-    
-    teardown: async (page, config) => {
-        // Cleanup code after scenario runs
-        console.log('Cleaning up user journey scenario...');
+    async executeNavigateStep(step, page) {
+        const { url, waitFor = 'networkidle', timeout = 10000, basicAuth } = step;
         
-        // Logout if needed
-        try {
-            const logoutLink = await page.$('a[href*="logout"], .logout-link, #logout');
-            if (logoutLink) {
-                await logoutLink.click();
+        // Handle basic authentication if configured in step
+        if (basicAuth?.enabled) {
+            await this.handleStepBasicAuth(url, basicAuth, page);
+            // After basic auth, we're already on the target page or redirected
+            // Just verify we're on the right page
+            const currentUrl = page.url();
+            this.logger.info(`🔐 After basic auth, current URL: ${currentUrl}`);
+        } else {
+            // Normal navigation without basic auth
+            await page.goto(url, { 
+                waitUntil: waitFor,
+                timeout 
+            });
+        }
+        
+        return { url: page.url() };
+    }
+
+    async executeClickStep(step, page) {
+        const { selector, waitFor, timeout = 5000, forceClick = false, waitForVisible = true } = step;
+        
+        // Wait for element based on waitForVisible setting
+        if (waitForVisible) {
+            await page.waitForSelector(selector, { timeout });
+        } else {
+            // Just wait for element to exist in DOM (might be hidden)
+            await page.waitForSelector(selector, { timeout, state: 'attached' });
+        }
+        
+        // Click function based on forceClick setting
+        const clickElement = async () => {
+            if (forceClick) {
+                // Force click even if element is hidden or not clickable
+                await page.evaluate((sel) => {
+                    const element = document.querySelector(sel);
+                    if (element) {
+                        element.click();
+                    } else {
+                        throw new Error(`Element not found: ${sel}`);
+                    }
+                }, selector);
+            } else {
+                await page.click(selector);
             }
-        } catch (error) {
-            // Ignore logout errors
+        };
+        
+        if (waitFor === 'navigation') {
+            await Promise.all([
+                page.waitForNavigation({ timeout }),
+                clickElement()
+            ]);
+        } else if (waitFor === 'response') {
+            await Promise.all([
+                page.waitForResponse(response => response.status() < 400, { timeout }),
+                clickElement()
+            ]);
+        } else {
+            await clickElement();
+        }
+        
+        return { clicked: selector };
+    }
+
+    async executeFillStep(step, page) {
+        const { selector, value, clearFirst = true, timeout = 5000 } = step;
+        
+        await page.waitForSelector(selector, { timeout });
+        
+        if (clearFirst) {
+            await page.fill(selector, '');
+        }
+        
+        await page.fill(selector, value);
+        
+        // Verify value was set (unless it's a password field)
+        if (!step.sensitive) {
+            const actualValue = await page.inputValue(selector);
+            if (actualValue !== value) {
+                throw new Error(`Failed to fill field. Expected: ${value}, Actual: ${actualValue}`);
+            }
+        }
+        
+        return { filled: selector, value: step.sensitive ? '[HIDDEN]' : value };
+    }
+
+    async executeFillFormStep(step, page) {
+        const { form } = step;
+        const results = [];
+        
+        // Wait for form to be present
+        if (form.selector) {
+            await page.waitForSelector(form.selector, { timeout: step.timeout || 10000 });
+        }
+        
+        // Fill each field
+        for (const field of form.fields || []) {
+            try {
+                await page.waitForSelector(field.selector, { timeout: 5000 });
+                
+                switch (field.type) {
+                    case 'text':
+                    case 'textarea':
+                        await page.fill(field.selector, field.value);
+                        break;
+                    case 'select':
+                        await page.selectOption(field.selector, field.value);
+                        break;
+                    case 'checkbox':
+                        if (field.value) {
+                            await page.check(field.selector);
+                        } else {
+                            await page.uncheck(field.selector);
+                        }
+                        break;
+                    case 'radio':
+                        await page.click(field.selector);
+                        break;
+                }
+                
+                results.push({ field: field.selector, status: 'filled' });
+            } catch (error) {
+                results.push({ field: field.selector, status: 'failed', error: error.message });
+            }
+        }
+        
+        return { formFilled: form.selector, fields: results };
+    }
+
+    async executeVerifyStep(step, page) {
+        // Verification step just runs assertions
+        return { verified: true };
+    }
+
+    async executeWaitStep(step, page) {
+        const { waitType, selector, timeout = 5000, condition } = step;
+        
+        switch (waitType) {
+            case 'selector':
+                await page.waitForSelector(selector, { timeout });
+                break;
+            case 'url':
+                await page.waitForURL(condition, { timeout });
+                break;
+            case 'timeout':
+                await page.waitForTimeout(timeout);
+                break;
+            case 'function':
+                await page.waitForFunction(condition, {}, { timeout });
+                break;
+        }
+        
+        return { waited: waitType };
+    }
+
+    async executeScenarioStep(step, page, config) {
+        // This would execute specific steps from another scenario
+        // For now, just return success
+        return { executedScenario: step.scenario };
+    }
+
+    async executeCustomStep(step, page) {
+        // Custom step execution - can be extended
+        return { customStep: step.action };
+    }
+
+    async runAssertions(assertions, page) {
+        for (const assertion of assertions) {
+            try {
+                await this.runSingleAssertion(assertion, page);
+            } catch (error) {
+                if (!assertion.optional) {
+                    throw error;
+                }
+                this.logger.warn(`Optional assertion failed: ${error.message}`);
+            }
         }
     }
-};
-                `
-            }
-        ];
 
-        for (const scenario of exampleScenarios) {
-            const filePath = path.join(testDir, scenario.name);
-            await fs.writeFile(filePath, scenario.content.trim(), 'utf8');
+    async runSingleAssertion(assertion, page) {
+        const { type, condition, value, selector } = assertion;
+        
+        switch (type) {
+            case 'url':
+                const currentUrl = page.url();
+                switch (condition) {
+                    case 'contains':
+                        if (!currentUrl.includes(value)) {
+                            throw new Error(`URL should contain '${value}', but was '${currentUrl}'`);
+                        }
+                        break;
+                    case 'not_contains':
+                        if (currentUrl.includes(value)) {
+                            throw new Error(`URL should not contain '${value}', but was '${currentUrl}'`);
+                        }
+                        break;
+                    case 'equals':
+                        if (currentUrl !== value) {
+                            throw new Error(`URL should equal '${value}', but was '${currentUrl}'`);
+                        }
+                        break;
+                }
+                break;
+                
+            case 'element':
+                switch (condition) {
+                    case 'visible':
+                        await page.waitForSelector(selector, { state: 'visible', timeout: 5000 });
+                        break;
+                    case 'hidden':
+                        await page.waitForSelector(selector, { state: 'hidden', timeout: 5000 });
+                        break;
+                    case 'hasValue':
+                        const inputValue = await page.inputValue(selector);
+                        if (inputValue !== value) {
+                            throw new Error(`Element ${selector} should have value '${value}', but was '${inputValue}'`);
+                        }
+                        break;
+                    case 'hasText':
+                        const textContent = await page.textContent(selector);
+                        if (!textContent.includes(value)) {
+                            throw new Error(`Element ${selector} should contain text '${value}', but was '${textContent}'`);
+                        }
+                        break;
+                }
+                break;
+                
+            case 'title':
+                const title = await page.title();
+                switch (condition) {
+                    case 'equals':
+                        if (title !== value) {
+                            throw new Error(`Title should equal '${value}', but was '${title}'`);
+                        }
+                        break;
+                    case 'not_equals':
+                        if (title === value) {
+                            throw new Error(`Title should not equal '${value}'`);
+                        }
+                        break;
+                    case 'contains':
+                        if (!title.includes(value)) {
+                            throw new Error(`Title should contain '${value}', but was '${title}'`);
+                        }
+                        break;
+                }
+                break;
         }
+    }
 
-        this.logger.info(`Created ${exampleScenarios.length} example E2E scenario files in ${testDir}`);
+    substituteVariables(step) {
+        const stepStr = JSON.stringify(step);
+        const substituted = stepStr.replace(/\{\{([^}]+)\}\}/g, (match, path) => {
+            const value = this.getVariableValue(path.trim());
+            return value !== undefined ? value : match;
+        });
+        return JSON.parse(substituted);
+    }
+
+    getVariableValue(path) {
+        const parts = path.split('.');
+        let current = this.variables;
+        
+        for (const part of parts) {
+            if (current && typeof current === 'object' && part in current) {
+                current = current[part];
+            } else {
+                return undefined;
+            }
+        }
+        
+        return current;
+    }
+
+    async takeScreenshotOnFailure(page, scenario, step, stepNumber, config) {
+        try {
+            const globalSettings = config.testTypes?.e2e?.globalSettings || {};
+            if (!globalSettings.screenshotOnFailure) return;
+            
+            const screenshotDir = path.join('reports', 'screenshots', 'e2e');
+            await fs.ensureDir(screenshotDir);
+            
+            const filename = `${scenario.id}-step-${stepNumber}-${step.id}-failure.png`;
+            const screenshotPath = path.join(screenshotDir, filename);
+            
+            await page.screenshot({ path: screenshotPath, fullPage: true });
+            this.logger.info(`📸 Screenshot saved: ${screenshotPath}`);
+        } catch (error) {
+            this.logger.warn(`Failed to take screenshot: ${error.message}`);
+        }
     }
 
     async cleanup() {
         try {
-            // Save tracing
             if (this.context) {
-                await this.context.tracing.stop({ path: 'reports/trace.zip' });
+                // Stop tracing if enabled
+                try {
+                    await this.context.tracing.stop({ path: 'reports/traces/e2e-trace.zip' });
+                } catch (error) {
+                    // Tracing might not be enabled
+                }
+                
                 await this.context.close();
-                this.context = null;
             }
+            
             if (this.browser) {
                 await this.browser.close();
-                this.browser = null;
             }
         } catch (error) {
-            this.logger.warn('E2E cleanup error:', error);
+            this.logger.warn('Error during E2E cleanup:', error.message);
         }
+    }
+
+    async handleStepBasicAuth(url, basicAuthConfig, page) {
+        try {
+            this.logger.info('🔐 Handling step-level basic authentication...');
+            this.logger.info(`🔐 Target URL: ${url}`);
+            this.logger.info(`🔐 Basic auth config: ${JSON.stringify(basicAuthConfig, null, 2)}`);
+            
+            // Navigate to the target URL (HTTP Basic Auth should be handled by browser context)
+            this.logger.info(`🔐 Navigating to target URL with HTTP Basic Auth: ${url}`);
+            await page.goto(url, { waitUntil: 'networkidle', timeout: 15000 });
+            
+            // Check current URL after HTTP Basic Auth
+            const currentUrl = page.url();
+            this.logger.info(`🔐 Current URL after HTTP Basic Auth: ${currentUrl}`);
+            
+            // Check if we're redirected to a form login page (double authentication)
+            if (basicAuthConfig.loginPage && currentUrl.includes(basicAuthConfig.loginPage)) {
+                this.logger.info('🔐 Detected form-based login after HTTP Basic Auth (double authentication)');
+                
+                // Wait for login form to be visible
+                let formFound = false;
+                const selectors = basicAuthConfig.usernameField.split(',').map(s => s.trim());
+                
+                for (const selector of selectors) {
+                    try {
+                        await page.waitForSelector(selector, { timeout: 5000 });
+                        formFound = true;
+                        this.logger.info(`🔐 Found login form with selector: ${selector}`);
+                        break;
+                    } catch (error) {
+                        this.logger.info(`🔐 Selector ${selector} not found, trying next...`);
+                    }
+                }
+                
+                if (formFound) {
+                    // Use different credentials for form login (from global auth config)
+                    const formUsername = this.config?.auth?.username || basicAuthConfig.username;
+                    const formPassword = this.config?.auth?.password || basicAuthConfig.password;
+                    
+                    this.logger.info('🔐 Filling form login after HTTP Basic Auth...');
+                    
+                    // Fill username
+                    const usernameSelector = await this.findWorkingSelector(basicAuthConfig.usernameField, page);
+                    if (usernameSelector) {
+                        await page.fill(usernameSelector, formUsername);
+                        this.logger.info(`🔐 Filled form username: ${formUsername}`);
+                    }
+
+                    // Fill password
+                    const passwordSelector = await this.findWorkingSelector(basicAuthConfig.passwordField, page);
+                    if (passwordSelector) {
+                        await page.fill(passwordSelector, formPassword);
+                        this.logger.info('🔐 Filled form password');
+                    }
+
+                    // Submit form
+                    const submitSelector = await this.findWorkingSelector(basicAuthConfig.submitButton, page);
+                    if (submitSelector) {
+                        this.logger.info('🔐 Submitting form login...');
+                        
+                        try {
+                            // Try with navigation wait first
+                            await Promise.all([
+                                page.waitForNavigation({ waitUntil: 'networkidle', timeout: 15000 }),
+                                page.click(submitSelector)
+                            ]);
+                        } catch (navigationError) {
+                            // If navigation wait fails, just click and wait
+                            this.logger.info('🔐 Navigation wait failed, trying simple click...');
+                            await page.click(submitSelector);
+                            await page.waitForTimeout(3000);
+                        }
+                        
+                        this.logger.info('🔐 Form login submitted successfully');
+                    }
+                }
+            } else {
+                this.logger.info('🔐 No form login required, HTTP Basic Auth was sufficient');
+            }
+
+            // Verify authentication success
+            await page.waitForTimeout(2000);
+            const finalUrl = page.url();
+            this.logger.info(`🔐 Final URL after complete authentication: ${finalUrl}`);
+            
+            // Check if we're still on login/auth page (indicating failure)
+            if (basicAuthConfig.loginPage && finalUrl.includes(basicAuthConfig.loginPage)) {
+                throw new Error(`Authentication failed - still on login page: ${finalUrl}`);
+            }
+
+            this.logger.info('✅ Complete authentication (HTTP Basic Auth + Form Login) completed successfully');
+            return true;
+
+        } catch (error) {
+            this.logger.error(`❌ Authentication failed: ${error.message}`);
+            this.logger.error(`❌ Auth error stack: ${error.stack}`);
+            this.logger.error(`❌ Auth config: ${JSON.stringify(basicAuthConfig, null, 2)}`);
+            this.logger.error(`❌ Target URL: ${url}`);
+            throw error;
+        }
+    }
+
+    async findWorkingSelector(selectorString, page) {
+        const selectors = selectorString.split(',').map(s => s.trim());
+        
+        for (const selector of selectors) {
+            try {
+                await page.waitForSelector(selector, { timeout: 2000 });
+                return selector;
+            } catch (error) {
+                // Continue to next selector
+            }
+        }
+        
+        throw new Error(`None of the selectors found: ${selectorString}`);
     }
 }
 

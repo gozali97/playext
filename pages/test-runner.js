@@ -55,7 +55,7 @@ export default function TestRunner() {
     try {
       // Prepare test data
       const testData = {
-        testType: selectedTestTypes.join(','),
+        testTypes: selectedTestTypes,
         options: {
           html: testOptions.html,
           verbose: testOptions.verbose,
@@ -66,16 +66,7 @@ export default function TestRunner() {
       addLog('info', 'Memulai eksekusi test...')
       addLog('info', `Menjalankan test: ${selectedTestTypes.join(', ')}`)
 
-      // Create EventSource for real-time updates
-      const es = new EventSource('/api/test/run', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(testData)
-      })
-
-      // For POST requests, we need to use fetch with streaming
+      // Simple fetch request without streaming
       const response = await fetch('/api/test/run', {
         method: 'POST',
         headers: {
@@ -88,31 +79,38 @@ export default function TestRunner() {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
 
-      const reader = response.body.getReader()
-      const decoder = new TextDecoder()
-
-      while (true) {
-        const { done, value } = await reader.read()
-        if (done) break
-
-        const chunk = decoder.decode(value)
-        const lines = chunk.split('\n')
-
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const data = JSON.parse(line.slice(6))
-              handleTestEvent(data)
-            } catch (e) {
-              console.error('Error parsing SSE data:', e)
-            }
+      const result = await response.json()
+      
+      if (result.success) {
+        addLog('success', 'Test execution completed successfully!')
+        
+        // Display test results summary
+        if (result.results?.summary) {
+          const summary = result.results.summary
+          addLog('info', `Total Tests: ${summary.totalTests}`)
+          addLog('info', `Passed: ${summary.passed}`)
+          addLog('info', `Failed: ${summary.failed}`)
+          addLog('info', `Skipped: ${summary.skipped}`)
+          
+          if (summary.errors && summary.errors.length > 0) {
+            summary.errors.forEach(error => {
+              addLog('error', error)
+            })
           }
+        }
+        
+        setResults(result.results)
+      } else {
+        addLog('error', 'Test execution failed')
+        if (result.error) {
+          addLog('error', result.error)
         }
       }
 
     } catch (error) {
       console.error('Test execution error:', error)
       addLog('error', `Error: ${error.message}`)
+    } finally {
       setIsRunning(false)
     }
   }

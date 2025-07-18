@@ -1,0 +1,399 @@
+{
+  "target": {
+    "url": "https://kpi.k24.co.id",
+    "name": "Your Application",
+    "description": "Configuration for your application testing"
+  },
+  "auth": {
+    "username": "ahmad.gozali@k24.co.id",
+    "password": "multi123T",
+    "loginUrl": "/scp",
+    "usernameField": "#LoginForm_username",
+    "passwordField": "#LoginForm_password",
+    "submitButton": "input[type='submit'], button[type='submit'], .submit-btn",
+    "apiKey": "",
+    "bearerToken": ""
+  },
+  "testTypes": {
+    "unit": {
+      "enabled": true,
+      "testDir": "src/tests/unit",
+      "pattern": "**/*.test.js",
+      "timeout": 5000
+    },
+    "integration": {
+      "enabled": true,
+      "testDir": "src/tests/integration",
+      "pattern": "**/*.test.js",
+      "timeout": 30000
+    },
+    "functional": {
+      "enabled": true,
+      "testDir": "src/tests/functional",
+      "pattern": "**/*.test.js",
+      "timeout": 60000
+    },
+    "e2e": {
+      "enabled": true,
+      "testDir": "src/tests/e2e",
+      "pattern": "**/*.test.js",
+      "timeout": 120000,
+      "selectedScenarios": [
+        "login-logout-flow-checklist"
+      ],
+      "runOnlySelected": true,
+      "scenarios": [
+        {
+          "id": "login-logout-flow",
+          "name": "Complete Login to Logout Flow KPI",
+          "description": "Test complete user journey from login to logout",
+          "enabled": true,
+          "critical": true,
+          "isMainScenario": false,
+          "timeout": 60000,
+          "retries": 2,
+          "steps": [
+            {
+              "id": "navigate-to-login",
+              "type": "navigate",
+              "name": "Navigate to Login Page",
+              "url": "https://kpi.k24.co.id",
+              "waitFor": "networkidle",
+              "timeout": 10000,
+              "assertions": [
+                {
+                  "type": "url",
+                  "condition": "contains",
+                  "value": "/scp"
+                }
+              ]
+            },
+            {
+              "id": "fill-username",
+              "type": "fill",
+              "name": "Fill Username",
+              "selector": "#LoginForm_username",
+              "value": "ahmad.gozali@k24.co.id",
+              "clearFirst": true,
+              "timeout": 5000,
+              "assertions": []
+            },
+            {
+              "id": "fill-password",
+              "type": "fill",
+              "name": "Fill Password",
+              "selector": "#LoginForm_password",
+              "value": "multi123T",
+              "clearFirst": true,
+              "timeout": 5000,
+              "sensitive": true
+            },
+            {
+              "id": "click-login",
+              "type": "click",
+              "name": "Click Login Button",
+              "selector": "input[type='submit'], button[type='submit'], .submit-btn",
+              "waitFor": "navigation",
+              "timeout": 10000,
+              "assertions": [
+                {
+                  "type": "url",
+                  "condition": "not_contains",
+                  "value": "/scp"
+                }
+              ]
+            },
+            {
+              "id": "verify-dashboard",
+              "type": "verify",
+              "name": "Verify Dashboard Loaded",
+              "assertions": [
+                {
+                  "type": "url",
+                  "condition": "contains",
+                  "value": "/dashboard"
+                },
+                {
+                  "type": "element",
+                  "selector": ".user-menu, .logout, a[href*='logout']",
+                  "condition": "visible"
+                },
+                {
+                  "type": "title",
+                  "condition": "not_equals",
+                  "value": "Login"
+                }
+              ]
+            },
+            {
+              "id": "navigate-to-kpi",
+              "type": "navigate",
+              "name": "Navigate to KPI BSC",
+              "url": "https://kpi.k24.co.id/KpiBsc/bscAnswer",
+              "waitFor": "networkidle",
+              "timeout": 15000,
+              "assertions": [
+                {
+                  "type": "url",
+                  "condition": "contains",
+                  "value": "/KpiBsc/bscAnswer"
+                }
+              ]
+            },
+            {
+              "id": "verify-kpi-page",
+              "type": "fill",
+              "name": "Input form my bsc",
+              "assertions": [],
+              "waitFor": "networkidle",
+              "value": "0",
+              "selector": ".impBln, nilai5"
+            },
+            {
+              "id": "logout",
+              "type": "click",
+              "name": "Logout",
+              "selector": ".logout, a[href*='logout'], button[onclick*='logout']",
+              "waitFor": "navigation",
+              "timeout": 10000,
+              "assertions": [
+                {
+                  "type": "url",
+                  "condition": "contains",
+                  "value": "/scp"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "login-logout-flow-checklist",
+          "name": "Complete Login to Logout Flow Checklist",
+          "description": "Test complete user journey from login to logout with double authentication",
+          "enabled": true,
+          "critical": true,
+          "isMainScenario": true,
+          "timeout": 60000,
+          "retries": 2,
+          "steps": [
+            {
+              "id": "navigate-and-login",
+              "type": "navigate",
+              "name": "Navigate and Auto-Login with Double Auth",
+              "url": "https://staging-checklist.k24.co.id",
+              "waitFor": "networkidle",
+              "timeout": 20000,
+              "basicAuth": {
+                "enabled": true,
+                "username": "a",
+                "password": "a",
+                "usernameField": "#LoginForm_username, input[name='LoginForm[username]'], input[type='text']",
+                "passwordField": "#LoginForm_password, input[name='LoginForm[password]'], input[type='password']",
+                "submitButton": "input[type='submit'], button[type='submit'], .btn-login, .submit-btn",
+                "loginPage": "/scp"
+              },
+              "assertions": [
+                {
+                  "type": "url",
+                  "condition": "contains",
+                  "value": "staging-checklist.k24.co.id"
+                },
+                {
+                  "type": "url",
+                  "condition": "not_contains",
+                  "value": "/scp"
+                }
+              ]
+            },
+            {
+              "id": "verify-dashboard",
+              "type": "verify",
+              "name": "Verify Dashboard Loaded",
+              "assertions": [
+                {
+                  "type": "url",
+                  "condition": "contains",
+                  "value": "/boardOm/admin"
+                },
+                {
+                  "type": "title",
+                  "condition": "not_equals",
+                  "value": "Login"
+                }
+              ]
+            },
+            {
+              "id": "navigate-to-permission",
+              "type": "navigate",
+              "name": "Navigate to Permission",
+              "url": "https://staging-checklist.k24.co.id/permission/admin",
+              "waitFor": "networkidle",
+              "timeout": 15000,
+              "assertions": [
+                {
+                  "type": "url",
+                  "condition": "contains",
+                  "value": "/permission/admin"
+                }
+              ]
+            },
+            {
+              "id": "navigate-to-permission-create",
+              "type": "navigate",
+              "name": "Navigate to Permission Create",
+              "url": "https://staging-checklist.k24.co.id/permission/create",
+              "waitFor": "networkidle",
+              "timeout": 15000,
+              "assertions": [
+                {
+                  "type": "url",
+                  "condition": "contains",
+                  "value": "/permission/create"
+                }
+              ]
+            },
+            {
+              "id": "fill-permission-name",
+              "type": "fill",
+              "name": "Fill Permission Name",
+              "selector": "#Permission_permission_name, Permission[permission_name]",
+              "value": "test-auto-{{timestamp}}",
+              "clearFirst": true,
+              "timeout": 10000,
+              "assertions": []
+            },
+            {
+              "id": "logout",
+              "type": "click",
+              "name": "Logout",
+              "selector": ".logout, a[href*='logout'], button[onclick*='logout']",
+              "waitFor": "navigation",
+              "timeout": 10000,
+              "assertions": [
+                {
+                  "type": "url",
+                  "condition": "contains",
+                  "value": "/scp"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "globalSettings": {
+        "screenshotOnFailure": true,
+        "videoRecording": false,
+        "tracing": true,
+        "slowMo": 500,
+        "retryOnFailure": true,
+        "maxRetries": 2,
+        "parallelExecution": false,
+        "waitForSelectors": true,
+        "autoWait": true
+      }
+    },
+    "regression": {
+      "enabled": true,
+      "baselineDir": "data/baselines",
+      "compareDir": "data/comparisons",
+      "tolerance": 0.1
+    },
+    "smoke": {
+      "enabled": true,
+      "criticalPaths": [
+        "/dashboard",
+        "/KpiBsc/bscAnswer"
+      ],
+      "timeout": 30000
+    },
+    "performance": {
+      "enabled": true,
+      "metrics": [
+        "loadTime",
+        "domContentLoaded",
+        "firstPaint",
+        "firstContentfulPaint"
+      ],
+      "thresholds": {
+        "loadTime": 3000,
+        "domContentLoaded": 2000,
+        "firstPaint": 1500,
+        "firstContentfulPaint": 2000
+      }
+    },
+    "load": {
+      "enabled": true,
+      "virtualUsers": 10,
+      "duration": 60000,
+      "rampUp": 10000
+    },
+    "security": {
+      "enabled": true,
+      "checks": [
+        "xss",
+        "sqlInjection",
+        "csrf",
+        "headers",
+        "ssl"
+      ],
+      "timeout": 30000
+    }
+  },
+  "browser": {
+    "type": "chromium",
+    "headless": false,
+    "slowMo": 500,
+    "timeout": 30000,
+    "viewport": {
+      "width": 1920,
+      "height": 1080
+    },
+    "options": {
+      "args": [
+        "--no-sandbox",
+        "--disable-setuid-sandbox"
+      ]
+    }
+  },
+  "reporting": {
+    "enabled": true,
+    "formats": [
+      "json",
+      "html"
+    ],
+    "outputDir": "reports",
+    "includeScreenshots": true,
+    "includeVideos": false
+  },
+  "performance": {
+    "metrics": [
+      "loadTime",
+      "domContentLoaded",
+      "firstPaint",
+      "firstContentfulPaint"
+    ],
+    "thresholds": {
+      "loadTime": 3000,
+      "domContentLoaded": 2000,
+      "firstPaint": 1500,
+      "firstContentfulPaint": 2000
+    },
+    "collectNetworkLogs": true,
+    "collectConsoleLogs": true
+  },
+  "global": {
+    "retries": 2,
+    "timeout": 30000,
+    "verbose": true,
+    "parallel": false,
+    "maxConcurrency": 1
+  },
+  "variables": {
+    "custom": {
+      "url": "https://example.com",
+      "clickSelector": "button",
+      "fillSelector": "input[name='test']",
+      "fillValue": "test value"
+    }
+  }
+}
