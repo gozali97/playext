@@ -1,9 +1,1 @@
-{
-  "/_app": "pages/_app.js",
-  "/_error": "pages/_error.js",
-  "/_document": "pages/_document.js",
-  "/": "pages/index.js",
-  "/api/dashboard": "pages/api/dashboard.js",
-  "/configuration": "pages/configuration.js",
-  "/api/config": "pages/api/config.js"
-}
+{"/_app":"pages/_app.js","/_error":"pages/_error.js","/analytics":"pages/analytics.html","/api/analytics":"pages/api/analytics.js","/api/config":"pages/api/config.js","/api/dashboard":"pages/api/dashboard.js","/api/reports":"pages/api/reports.js","/api/reports/serve/[...path]":"pages/api/reports/serve/[...path].js","/api/test/run":"pages/api/test/run.js","/configuration":"pages/configuration.html","/":"pages/index.html","/reports":"pages/reports.html","/test-runner":"pages/test-runner.html","/_document":"pages/_document.js","/404":"pages/404.html"}
